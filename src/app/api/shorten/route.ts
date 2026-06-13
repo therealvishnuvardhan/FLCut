@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "../../../lib/db";
 import { encodeId } from "../../../lib/hashids";
 import { hasProfanity } from "../../../lib/profanity";
+import { auth } from "../../../auth";
 
 const RESERVED_SLUGS = [
   "api",
@@ -18,8 +19,18 @@ const RESERVED_SLUGS = [
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await auth();
+    const creatorId = session?.user?.id || null;
+
     const body = await req.json();
-    const { longUrl, customSlug } = body;
+    const {
+      longUrl,
+      customSlug,
+      validFrom,
+      validUntil,
+      maxClicks,
+      fallbackUrl,
+    } = body;
 
     // Validate longUrl existence
     if (!longUrl || typeof longUrl !== "string") {
@@ -43,6 +54,16 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Common data for creation
+    const creationData: any = {
+      longUrl: targetUrl,
+      creatorId,
+      validFrom: validFrom ? new Date(validFrom) : null,
+      validUntil: validUntil ? new Date(validUntil) : null,
+      maxClicks: maxClicks ? parseInt(String(maxClicks), 10) : null,
+      fallbackUrl: fallbackUrl ? String(fallbackUrl).trim() : null,
+    };
 
     // Handle Custom Slug validation and creation
     if (customSlug) {
@@ -83,8 +104,8 @@ export async function POST(req: NextRequest) {
       try {
         const newLink = await db.shortLink.create({
           data: {
+            ...creationData,
             slug,
-            longUrl: targetUrl,
           },
         });
         return NextResponse.json(newLink, { status: 201 });
@@ -118,9 +139,9 @@ export async function POST(req: NextRequest) {
 
       const newLink = await db.shortLink.create({
         data: {
+          ...creationData,
           id: nextId,
           slug: generatedSlug,
-          longUrl: targetUrl,
         },
       });
 

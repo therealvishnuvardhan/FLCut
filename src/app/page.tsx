@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession, signOut } from "next-auth/react";
 import {
   Link2,
   Sparkles,
@@ -29,6 +30,10 @@ interface ShortLink {
 }
 
 export default function Home() {
+  const { data: session, status } = useSession();
+  const user = session?.user;
+  const isLoggedIn = status === "authenticated";
+
   const [longUrl, setLongUrl] = useState("");
   const [customSlug, setCustomSlug] = useState("");
   
@@ -51,7 +56,7 @@ export default function Home() {
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
   const [origin, setOrigin] = useState("");
 
-  // Set origin on mount
+  // Set origin and check URL parameters on mount
   useEffect(() => {
     setOrigin(window.location.origin);
     // Load local slugs
@@ -85,9 +90,9 @@ export default function Home() {
     }
   }, []);
 
-  // Fetch local links details
+  // Fetch links details (either for logged-in user or anonymous slugs)
   useEffect(() => {
-    if (localSlugs.length === 0) {
+    if (!isLoggedIn && localSlugs.length === 0) {
       setMyLinks([]);
       return;
     }
@@ -95,7 +100,8 @@ export default function Home() {
     const fetchLinks = async () => {
       setIsFetchingLinks(true);
       try {
-        const res = await fetch(`/api/links?slugs=${localSlugs.join(",")}`);
+        const query = isLoggedIn ? "" : `?slugs=${localSlugs.join(",")}`;
+        const res = await fetch(`/api/links${query}`);
         if (res.ok) {
           const data = await res.json();
           setMyLinks(data);
@@ -108,7 +114,7 @@ export default function Home() {
     };
 
     fetchLinks();
-  }, [localSlugs]);
+  }, [localSlugs, isLoggedIn]);
 
   const handleShorten = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,7 +132,6 @@ export default function Home() {
         payload.customSlug = customSlug.trim();
       }
 
-      // Add advanced parameters if they are filled (available in route.ts in future phases, but we write them here to prepare)
       if (validFrom) payload.validFrom = new Date(validFrom).toISOString();
       if (validUntil) payload.validUntil = new Date(validUntil).toISOString();
       if (maxClicks) payload.maxClicks = parseInt(maxClicks, 10);
@@ -162,10 +167,15 @@ export default function Home() {
       setFallbackUrl("");
       setShowAdvanced(false);
 
-      // Save to localStorage
-      const updatedSlugs = [data.slug, ...localSlugs.filter((s) => s !== data.slug)];
-      localStorage.setItem("flcut_local_slugs", JSON.stringify(updatedSlugs));
-      setLocalSlugs(updatedSlugs);
+      // Save to local list if anonymous
+      if (!isLoggedIn) {
+        const updatedSlugs = [data.slug, ...localSlugs.filter((s) => s !== data.slug)];
+        localStorage.setItem("flcut_local_slugs", JSON.stringify(updatedSlugs));
+        setLocalSlugs(updatedSlugs);
+      } else {
+        // If logged in, reload link list from database directly
+        setMyLinks((prev) => [data, ...prev]);
+      }
     } catch (err) {
       setError("Failed to connect to server. Please try again.");
       console.error(err);
@@ -182,10 +192,26 @@ export default function Home() {
     }, 2000);
   };
 
-  const handleDelete = (slug: string) => {
-    const updatedSlugs = localSlugs.filter((s) => s !== slug);
-    localStorage.setItem("flcut_local_slugs", JSON.stringify(updatedSlugs));
-    setLocalSlugs(updatedSlugs);
+  const handleDelete = async (slug: string) => {
+    if (isLoggedIn) {
+      try {
+        const res = await fetch(`/api/links?slug=${slug}`, {
+          method: "DELETE",
+        });
+        if (res.ok) {
+          setMyLinks(myLinks.filter((link) => link.slug !== slug));
+        } else {
+          const data = await res.json();
+          alert(data.error || "Failed to delete link.");
+        }
+      } catch (err) {
+        console.error("Delete failed:", err);
+      }
+    } else {
+      const updatedSlugs = localSlugs.filter((s) => s !== slug);
+      localStorage.setItem("flcut_local_slugs", JSON.stringify(updatedSlugs));
+      setLocalSlugs(updatedSlugs);
+    }
   };
 
   const isLinkActive = (link: ShortLink) => {
@@ -217,10 +243,49 @@ export default function Home() {
               </p>
             </div>
           </div>
+          
           <div className="flex items-center gap-4">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-neutral-900 border border-neutral-800 text-neutral-400 font-mono">
+            {isLoggedIn && user ? (
+              <div className="flex items-center gap-3">
+                {user.image ? (
+                  <img
+                    src={user.image}
+                    alt={user.name || "User"}
+                    className="h-8 w-8 rounded-full border border-neutral-700"
+                  />
+                ) : (
+                  <div className="h-8 w-8 rounded-full bg-violet-600 flex items-center justify-center text-xs font-bold text-white uppercase border border-neutral-700">
+                    {user.name ? user.name.charAt(0) : user.email?.charAt(0)}
+                  </div>
+                )}
+                <div className="hidden sm:flex flex-col text-left">
+                  <span className="text-xs font-semibold text-white leading-none">
+                    {user.name || "Creator"}
+                  </span>
+                  <span className="text-[10px] text-neutral-500 font-mono leading-none mt-0.5">
+                    {user.email}
+                  </span>
+                </div>
+                <button
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  className="bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-neutral-300 font-semibold py-1.5 px-3 rounded-lg text-xs transition-colors cursor-pointer"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <a
+                  href="/auth/login"
+                  className="bg-white hover:bg-neutral-200 text-black font-semibold py-1.5 px-3 rounded-lg text-xs transition-colors shadow select-none cursor-pointer"
+                >
+                  Sign In
+                </a>
+              </div>
+            )}
+            <span className="hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-neutral-900 border border-neutral-800 text-neutral-400 font-mono">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              v1.0 Local Only
+              v1.0 {isLoggedIn ? "Account" : "Local"}
             </span>
           </div>
         </div>
@@ -234,7 +299,7 @@ export default function Home() {
             Shorten Links with Precision.
           </h2>
           <p className="text-neutral-400 text-base max-w-xl mx-auto leading-relaxed">
-            Create fast, clean, and customizable short links instantly. Monitor your creations right in your browser dashboard.
+            Create fast, clean, and customizable short links instantly. Monitor your creations right in your {isLoggedIn ? "creator account" : "browser"} dashboard.
           </p>
         </div>
 
@@ -289,7 +354,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setShowAdvanced(!showAdvanced)}
-                className="flex items-center gap-2 text-xs font-semibold text-neutral-400 hover:text-white transition-colors"
+                className="flex items-center gap-2 text-xs font-semibold text-neutral-400 hover:text-white transition-colors cursor-pointer"
               >
                 <Sliders className="h-3.5 w-3.5" />
                 Advanced Controls (Validity & Expiration)
@@ -375,7 +440,7 @@ export default function Home() {
                             setError(null);
                             setSuggestions([]);
                           }}
-                          className="bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-xs font-mono py-1 px-3 rounded-lg text-cyan-400 hover:text-cyan-300 transition-colors"
+                          className="bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-xs font-mono py-1 px-3 rounded-lg text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer"
                         >
                           {sug}
                         </button>
@@ -390,7 +455,7 @@ export default function Home() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-bold py-3.5 px-6 rounded-xl text-sm transition-all hover:opacity-95 disabled:opacity-50 hover:shadow-lg hover:shadow-violet-500/20 active:scale-[0.99] flex items-center justify-center gap-2 select-none"
+              className="w-full bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-bold py-3.5 px-6 rounded-xl text-sm transition-all hover:opacity-95 disabled:opacity-50 hover:shadow-lg hover:shadow-violet-500/20 active:scale-[0.99] flex items-center justify-center gap-2 select-none cursor-pointer"
             >
               {isLoading ? (
                 <>
@@ -426,7 +491,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => handleCopy(successLink.slug)}
-                className="w-full sm:w-auto bg-white hover:bg-neutral-200 text-black font-semibold py-2 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-md hover:scale-105 active:scale-95"
+                className="w-full sm:w-auto bg-white hover:bg-neutral-200 text-black font-semibold py-2 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-md hover:scale-105 active:scale-95 cursor-pointer"
               >
                 {copiedSlug === successLink.slug ? (
                   <>
@@ -448,7 +513,7 @@ export default function Home() {
         <div className="flex flex-col gap-6">
           <div className="flex justify-between items-center border-b border-neutral-900 pb-4">
             <h3 className="text-xl font-bold text-white flex items-center gap-2.5">
-              My Links
+              {isLoggedIn ? "Account Dashboard" : "My Links"}
               <span className="bg-neutral-900 border border-neutral-800 text-xs text-neutral-400 px-2 py-0.5 rounded-full font-mono font-normal">
                 {myLinks.length}
               </span>
@@ -475,7 +540,10 @@ export default function Home() {
               </div>
               <h4 className="font-semibold text-neutral-300">No links shortened yet</h4>
               <p className="text-xs text-neutral-500 max-w-xs leading-normal">
-                Your shortened links will appear here on this browser. Put a URL above to get started!
+                {isLoggedIn 
+                  ? "You haven't created any links under this account yet. Shorten a URL above to start!"
+                  : "Your shortened links will appear here on this browser. Put a URL above to get started!"
+                }
               </p>
             </div>
           ) : (
@@ -514,7 +582,7 @@ export default function Home() {
                       <button
                         type="button"
                         onClick={() => handleCopy(link.slug)}
-                        className="flex-1 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-neutral-300 font-semibold py-2 px-3 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5"
+                        className="flex-1 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-neutral-300 font-semibold py-2 px-3 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         {copiedSlug === link.slug ? (
                           <>
@@ -533,7 +601,7 @@ export default function Home() {
                         href={`${origin}/${link.slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-neutral-300 font-semibold py-2 px-3 rounded-xl text-xs transition-colors flex items-center justify-center"
+                        className="bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-neutral-300 font-semibold py-2 px-3 rounded-xl text-xs transition-colors flex items-center justify-center cursor-pointer"
                         title="Visit Link"
                       >
                         <ExternalLink className="h-3.5 w-3.5" />
@@ -542,7 +610,7 @@ export default function Home() {
                       <button
                         type="button"
                         onClick={() => handleDelete(link.slug)}
-                        className="bg-neutral-900 hover:bg-red-950/30 hover:border-red-900/50 hover:text-red-400 border border-neutral-800 text-neutral-500 py-2 px-3 rounded-xl text-xs transition-colors flex items-center justify-center"
+                        className="bg-neutral-900 hover:bg-red-950/30 hover:border-red-900/50 hover:text-red-400 border border-neutral-800 text-neutral-500 py-2 px-3 rounded-xl text-xs transition-colors flex items-center justify-center cursor-pointer"
                         title="Delete from Dashboard"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
