@@ -23,7 +23,13 @@ export async function GET(req: NextRequest) {
           createdAt: "desc",
         },
       });
-      return NextResponse.json(links);
+      return NextResponse.json(links, {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+      });
     }
 
     // Fallback to anonymous local storage slugs
@@ -61,7 +67,13 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(links);
+    return NextResponse.json(links, {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+        Pragma: "no-cache",
+        Expires: "0",
+      },
+    });
   } catch (error) {
     console.error("Error fetching local links:", error);
     return NextResponse.json(

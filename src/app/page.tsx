@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
+import Link from "next/link";
 import {
   Link2,
   Sparkles,
@@ -17,6 +18,7 @@ import {
   ChevronDown,
   ChevronUp,
   BarChart2,
+  RefreshCw,
 } from "lucide-react";
 
 interface ShortLink {
@@ -118,7 +120,7 @@ export default function Home() {
   const [myLinks, setMyLinks] = useState<ShortLink[]>([]);
   const [isFetchingLinks, setIsFetchingLinks] = useState(false);
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
-  const [expandedSlug, setExpandedSlug] = useState<string | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [origin, setOrigin] = useState("");
 
   // Set origin and check URL parameters on mount
@@ -166,7 +168,11 @@ export default function Home() {
       setIsFetchingLinks(true);
       try {
         const query = isLoggedIn ? "" : `?slugs=${localSlugs.join(",")}`;
-        const res = await fetch(`/api/links${query}`);
+        const res = await fetch(`/api/links${query}`, {
+          headers: {
+            "Cache-Control": "no-store",
+          },
+        });
         if (res.ok) {
           const data = await res.json();
           setMyLinks(data);
@@ -179,7 +185,7 @@ export default function Home() {
     };
 
     fetchLinks();
-  }, [localSlugs, isLoggedIn]);
+  }, [localSlugs, isLoggedIn, refreshTrigger]);
 
   const handleShorten = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -592,6 +598,16 @@ export default function Home() {
                 {myLinks.length}
               </span>
             </h3>
+            
+            <button
+              onClick={() => setRefreshTrigger((prev) => prev + 1)}
+              disabled={isFetchingLinks}
+              className="bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-neutral-400 hover:text-white p-2 rounded-xl transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 text-xs font-semibold select-none"
+              title="Refresh Dashboard"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${isFetchingLinks ? "animate-spin text-cyan-400" : ""}`} />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
           </div>
 
           {isFetchingLinks ? (
@@ -626,8 +642,6 @@ export default function Home() {
                 const active = isLinkActive(link);
                 const totalClicks = link.analyticsEvents?.length || 0;
                 const uniqueClicks = link.analyticsEvents?.filter((e) => e.isUnique).length || 0;
-                const breakdowns = getBreakdowns(link.analyticsEvents || []);
-                const isExpanded = expandedSlug === link.slug;
 
                 return (
                   <div
@@ -674,89 +688,6 @@ export default function Home() {
                         Created: {new Date(link.createdAt).toLocaleDateString()}
                       </span>
 
-                      {/* Expanded Analytics Drawer */}
-                      {isExpanded && (
-                        <div className="mt-2 pt-3 border-t border-neutral-800/60 text-xs flex flex-col gap-3 animate-fadeIn">
-                          <div className="grid grid-cols-2 gap-3">
-                            {/* Browsers & OS */}
-                            <div className="bg-neutral-950/30 border border-neutral-800/60 rounded-xl p-2.5 flex flex-col gap-1.5">
-                              <span className="font-bold text-neutral-400 border-b border-neutral-800 pb-0.5 text-[10px] uppercase tracking-wider">Browsers & OS</span>
-                              {totalClicks === 0 ? (
-                                <span className="text-neutral-600 text-[10px] italic py-1">No clicks yet</span>
-                              ) : (
-                                <div className="flex flex-col gap-1 text-[10px]">
-                                  {breakdowns.browsers.map(([name, count]) => (
-                                    <div key={name} className="flex justify-between text-neutral-300">
-                                      <span className="truncate max-w-[80px]">{name}</span>
-                                      <span className="font-mono text-neutral-500">{count}</span>
-                                    </div>
-                                  ))}
-                                  <div className="border-t border-neutral-800/40 my-1"></div>
-                                  {breakdowns.osList.map(([name, count]) => (
-                                    <div key={name} className="flex justify-between text-neutral-300">
-                                      <span className="truncate max-w-[80px]">{name}</span>
-                                      <span className="font-mono text-neutral-500">{count}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Locations */}
-                            <div className="bg-neutral-950/30 border border-neutral-800/60 rounded-xl p-2.5 flex flex-col gap-1.5">
-                              <span className="font-bold text-neutral-400 border-b border-neutral-800 pb-0.5 text-[10px] uppercase tracking-wider">Locations</span>
-                              {totalClicks === 0 ? (
-                                <span className="text-neutral-600 text-[10px] italic py-1">No clicks yet</span>
-                              ) : (
-                                <div className="flex flex-col gap-1 text-[10px]">
-                                  {breakdowns.countries.map(([name, count]) => (
-                                    <div key={name} className="flex justify-between text-neutral-300">
-                                      <span className="truncate max-w-[80px]">{name}</span>
-                                      <span className="font-mono text-neutral-500">{count}</span>
-                                    </div>
-                                  ))}
-                                  <div className="border-t border-neutral-800/40 my-1"></div>
-                                  {breakdowns.cities.map(([name, count]) => (
-                                    <div key={name} className="flex justify-between text-neutral-300">
-                                      <span className="truncate max-w-[80px]">{name}</span>
-                                      <span className="font-mono text-neutral-500">{count}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Recent Activity Logs */}
-                          <div className="bg-neutral-950/30 border border-neutral-800/60 rounded-xl p-2.5 flex flex-col gap-1.5">
-                            <span className="font-bold text-neutral-400 border-b border-neutral-800 pb-0.5 text-[10px] uppercase tracking-wider">Recent Activity</span>
-                            {totalClicks === 0 ? (
-                              <span className="text-neutral-600 text-[10px] italic py-1">No clicks yet</span>
-                            ) : (
-                              <div className="flex flex-col gap-1.5 text-[10px] max-h-24 overflow-y-auto">
-                                {(link.analyticsEvents || []).slice(0, 5).map((e, idx) => {
-                                  const { browser } = parseUserAgent(e.userAgent);
-                                  const loc = [e.city, e.country].filter(Boolean).join(", ") || "Unknown Location";
-                                  return (
-                                    <div key={e.id || idx} className="flex justify-between items-center text-neutral-300 border-b border-neutral-900/40 pb-1 last:border-b-0">
-                                      <div className="flex flex-col text-left">
-                                        <span className="truncate max-w-[150px] font-medium">{loc}</span>
-                                        <span className="text-[8px] text-neutral-500 font-mono">{browser}</span>
-                                      </div>
-                                      <div className="flex flex-col items-end">
-                                        <span className="text-neutral-400">{new Date(e.clickedAt).toLocaleDateString()}</span>
-                                        {e.isUnique && (
-                                          <span className="text-[7px] text-emerald-400 font-bold uppercase tracking-wider font-mono">Unique</span>
-                                        )}
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
                     </div>
 
                     <div className="flex gap-2 border-t border-neutral-800/60 pt-3 mt-1">
@@ -788,17 +719,14 @@ export default function Home() {
                         <ExternalLink className="h-3.5 w-3.5" />
                       </a>
 
-                      {/* Analytics Toggle Button */}
-                      <button
-                        type="button"
-                        onClick={() => setExpandedSlug(isExpanded ? null : link.slug)}
-                        className={`bg-neutral-900 hover:bg-neutral-800 border ${
-                          isExpanded ? "border-violet-500/50 text-violet-400" : "border-neutral-800 text-neutral-500 hover:text-white"
-                        } py-2 px-3 rounded-xl text-xs transition-colors flex items-center justify-center cursor-pointer`}
+                      {/* Analytics Navigation Link */}
+                      <Link
+                        href={`/analytics/${link.slug}`}
+                        className="bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-500 hover:text-violet-400 py-2 px-3 rounded-xl text-xs transition-colors flex items-center justify-center cursor-pointer"
                         title="View Analytics"
                       >
                         <BarChart2 className="h-3.5 w-3.5" />
-                      </button>
+                      </Link>
 
                       <button
                         type="button"
