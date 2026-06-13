@@ -26,6 +26,7 @@ interface ShortLink {
   validUntil: string | null;
   maxClicks: number | null;
   fallbackUrl: string | null;
+  bypassAuth: boolean;
   createdAt: string;
 }
 
@@ -42,7 +43,7 @@ export default function Home() {
   const [validFrom, setValidFrom] = useState("");
   const [validUntil, setValidUntil] = useState("");
   const [maxClicks, setMaxClicks] = useState("");
-  const [fallbackUrl, setFallbackUrl] = useState("");
+  const [requireAuth, setRequireAuth] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -126,6 +127,7 @@ export default function Home() {
     try {
       const payload: any = {
         longUrl,
+        bypassAuth: !requireAuth,
       };
 
       if (customSlug.trim()) {
@@ -135,7 +137,6 @@ export default function Home() {
       if (validFrom) payload.validFrom = new Date(validFrom).toISOString();
       if (validUntil) payload.validUntil = new Date(validUntil).toISOString();
       if (maxClicks) payload.maxClicks = parseInt(maxClicks, 10);
-      if (fallbackUrl) payload.fallbackUrl = fallbackUrl.trim();
 
       const res = await fetch("/api/shorten", {
         method: "POST",
@@ -164,7 +165,7 @@ export default function Home() {
       setValidFrom("");
       setValidUntil("");
       setMaxClicks("");
-      setFallbackUrl("");
+      setRequireAuth(false);
       setShowAdvanced(false);
 
       // Save to local list if anonymous
@@ -404,17 +405,26 @@ export default function Home() {
                     />
                   </div>
 
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-neutral-400 flex items-center gap-1.5">
-                      <HelpCircle className="h-3 w-3" /> Fallback URL
+                  {/* Visitor authentication toggle */}
+                  <div className="flex flex-col gap-1.5 md:col-span-2 border-t border-neutral-800/60 pt-4 mt-2">
+                    <label className="flex items-center gap-3 cursor-pointer select-none">
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          checked={requireAuth}
+                          onChange={(e) => setRequireAuth(e.target.checked)}
+                          className="sr-only"
+                        />
+                        <div className={`w-10 h-5 rounded-full transition-colors ${requireAuth ? 'bg-violet-600' : 'bg-neutral-800'}`}></div>
+                        <div className={`absolute top-0.5 left-0.5 bg-white w-4 h-4 rounded-full transition-transform ${requireAuth ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs font-semibold text-neutral-300">Require FLCut Login</span>
+                        <span className="text-[10px] text-neutral-500">
+                          Force visitors to sign in on FLCut first (ideal if the destination site has no built-in auth).
+                        </span>
+                      </div>
                     </label>
-                    <input
-                      type="text"
-                      placeholder="Waitlist / Expired fallback page"
-                      value={fallbackUrl}
-                      onChange={(e) => setFallbackUrl(e.target.value)}
-                      className="bg-neutral-950/80 border border-neutral-800 rounded-lg p-2 text-xs text-neutral-300 placeholder-neutral-600 focus:outline-none focus:ring-1 focus:ring-violet-500"
-                    />
                   </div>
                 </div>
               )}
@@ -557,18 +567,25 @@ export default function Home() {
                   >
                     <div className="flex flex-col gap-1.5">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-mono text-sm font-bold text-white max-w-[70%] truncate">
+                        <span className="font-mono text-sm font-bold text-white max-w-[50%] truncate">
                           /{link.slug}
                         </span>
-                        <span
-                          className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider font-mono border ${
-                            active
-                              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                              : "bg-red-500/10 border-red-500/20 text-red-400"
-                          }`}
-                        >
-                          {active ? "Active" : "Expired"}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          {!link.bypassAuth && (
+                            <span className="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider font-mono bg-violet-500/10 border border-violet-500/20 text-violet-400">
+                              Auth Req
+                            </span>
+                          )}
+                          <span
+                            className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider font-mono border ${
+                              active
+                                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                                : "bg-red-500/10 border-red-500/20 text-red-400"
+                            }`}
+                          >
+                            {active ? "Active" : "Expired"}
+                          </span>
+                        </div>
                       </div>
                       <p className="text-xs text-neutral-400 truncate" title={link.longUrl}>
                         {link.longUrl}

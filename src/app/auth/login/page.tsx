@@ -1,20 +1,42 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 
-export default function LoginPage() {
+function LoginForm() {
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
 
   const handleLogin = () => {
     setLoading(true);
-    signIn("google", { callbackUrl: "/" }).catch((err) => {
+    signIn("google", { callbackUrl }).catch((err) => {
       console.error(err);
       setLoading(false);
     });
   };
 
+  return (
+    <button
+      onClick={handleLogin}
+      disabled={loading}
+      className="w-full bg-white hover:bg-neutral-200 text-black font-bold py-3.5 px-6 rounded-xl text-sm transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 select-none cursor-pointer"
+    >
+      {loading ? (
+        <div className="h-4 w-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+      ) : (
+        <>
+          Sign in with Google
+          <ArrowRight className="h-4 w-4" />
+        </>
+      )}
+    </button>
+  );
+}
+
+export default function LoginPage() {
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col font-sans relative overflow-hidden items-center justify-center px-4">
       {/* Background gradients */}
@@ -42,20 +64,13 @@ export default function LoginPage() {
         </div>
 
         {/* Buttons */}
-        <button
-          onClick={handleLogin}
-          disabled={loading}
-          className="w-full bg-white hover:bg-neutral-200 text-black font-bold py-3.5 px-6 rounded-xl text-sm transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 select-none cursor-pointer"
-        >
-          {loading ? (
-            <div className="h-4 w-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-          ) : (
-            <>
-              Sign in with Google
-              <ArrowRight className="h-4 w-4" />
-            </>
-          )}
-        </button>
+        <Suspense fallback={
+          <button disabled className="w-full bg-white/50 text-black/50 font-bold py-3.5 px-6 rounded-xl text-sm flex items-center justify-center gap-2 select-none cursor-not-allowed">
+            Loading Google Sign-in...
+          </button>
+        }>
+          <LoginForm />
+        </Suspense>
 
         <p className="text-[10px] text-neutral-500 font-mono">
           Authorized club admin logins only.

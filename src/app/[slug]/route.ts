@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { notFound } from "next/navigation";
 import { db } from "../../lib/db";
+import { auth } from "../../auth";
 
 export async function GET(
   req: NextRequest,
@@ -20,29 +21,27 @@ export async function GET(
       notFound();
     }
 
+    // If visitor auth is required, block anonymous access
+    if (!link.bypassAuth) {
+      const session = await auth();
+      if (!session?.user) {
+        const loginUrl = new URL("/auth/login", req.url);
+        loginUrl.searchParams.set("callbackUrl", req.url);
+        return NextResponse.redirect(loginUrl);
+      }
+    }
+
     // Check validity dates (Phase 2 scheduling)
     const now = new Date();
     if (link.validFrom && now < link.validFrom) {
-      // Redirect back to home with message
       return NextResponse.redirect(
-        new URL(`/?error=link_not_active&slug=${slug}`, req.url)
+        new URL(`/inactive?slug=${slug}&reason=not_active`, req.url)
       );
     }
 
     if (link.validUntil && now > link.validUntil) {
-      if (link.fallbackUrl) {
-        return new NextResponse(null, {
-          status: 302,
-          headers: {
-            Location: link.fallbackUrl,
-            "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-            Pragma: "no-cache",
-            Expires: "0",
-          },
-        });
-      }
       return NextResponse.redirect(
-        new URL(`/?error=link_expired&slug=${slug}`, req.url)
+        new URL(`/inactive?slug=${slug}&reason=expired`, req.url)
       );
     }
 
@@ -52,19 +51,8 @@ export async function GET(
         const { redis } = await import("../../lib/redis");
         const clicks = await redis.incr(`click_count:${slug}`);
         if (clicks > link.maxClicks) {
-          if (link.fallbackUrl) {
-            return new NextResponse(null, {
-              status: 302,
-              headers: {
-                Location: link.fallbackUrl,
-                "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-                Pragma: "no-cache",
-                Expires: "0",
-              },
-            });
-          }
           return NextResponse.redirect(
-            new URL(`/?error=link_limit_reached&slug=${slug}`, req.url)
+            new URL(`/inactive?slug=${slug}&reason=limit`, req.url)
           );
         }
       } catch (redisError) {

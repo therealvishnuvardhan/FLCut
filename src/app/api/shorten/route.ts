@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
       validUntil,
       maxClicks,
       fallbackUrl,
+      bypassAuth,
     } = body;
 
     // Validate longUrl existence
@@ -63,6 +64,7 @@ export async function POST(req: NextRequest) {
       validUntil: validUntil ? new Date(validUntil) : null,
       maxClicks: maxClicks ? parseInt(String(maxClicks), 10) : null,
       fallbackUrl: fallbackUrl ? String(fallbackUrl).trim() : null,
+      bypassAuth: typeof bypassAuth === "boolean" ? bypassAuth : true,
     };
 
     // Handle Custom Slug validation and creation
