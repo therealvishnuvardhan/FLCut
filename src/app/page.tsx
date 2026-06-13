@@ -67,6 +67,22 @@ export default function Home() {
         setLocalSlugs(storedSlugs.split(",").filter(Boolean));
       }
     }
+
+    // Check URL parameters for redirect errors
+    const params = new URLSearchParams(window.location.search);
+    const err = params.get("error");
+    const slg = params.get("slug");
+    if (err) {
+      if (err === "link_not_active") {
+        setError(`The link /${slg} is not active yet.`);
+      } else if (err === "link_expired") {
+        setError(`The link /${slg} has expired.`);
+      } else if (err === "link_limit_reached") {
+        setError(`The link /${slg} has reached its click limit.`);
+      }
+      // Clean up search parameters from the address bar
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }, []);
 
   // Fetch local links details

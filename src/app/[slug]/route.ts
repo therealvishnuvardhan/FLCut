@@ -20,10 +20,10 @@ export async function GET(
       notFound();
     }
 
-    // Check validity dates (Phase 2 scheduling, checking if columns exist and are relevant)
+    // Check validity dates (Phase 2 scheduling)
     const now = new Date();
     if (link.validFrom && now < link.validFrom) {
-      // Redirect to a landing countdown/not active page or back to home with message
+      // Redirect back to home with message
       return NextResponse.redirect(
         new URL(`/?error=link_not_active&slug=${slug}`, req.url)
       );
@@ -44,6 +44,32 @@ export async function GET(
       return NextResponse.redirect(
         new URL(`/?error=link_expired&slug=${slug}`, req.url)
       );
+    }
+
+    // Check click cap (Phase 2 maxClicks)
+    if (link.maxClicks !== null) {
+      try {
+        const { redis } = await import("../../lib/redis");
+        const clicks = await redis.incr(`click_count:${slug}`);
+        if (clicks > link.maxClicks) {
+          if (link.fallbackUrl) {
+            return new NextResponse(null, {
+              status: 302,
+              headers: {
+                Location: link.fallbackUrl,
+                "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+                Pragma: "no-cache",
+                Expires: "0",
+              },
+            });
+          }
+          return NextResponse.redirect(
+            new URL(`/?error=link_limit_reached&slug=${slug}`, req.url)
+          );
+        }
+      } catch (redisError) {
+        console.error("Failed to increment click count in Redis:", redisError);
+      }
     }
 
     // Perform a non-cached 302 Found redirect to the destination longUrl
