@@ -37,5 +37,34 @@ model ShortLink {
   
   createdAt   DateTime  @default(now()) @map("created_at")
 
+  analyticsEvents  AnalyticsEvent[]
+  hourlyAggregates HourlyAggregate[]
+
   @@map("short_links")
+}
+
+model AnalyticsEvent {
+  id        Int       @id @default(autoincrement())
+  linkId    Int       @map("link_id")
+  link      ShortLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  isUnique  Boolean   @map("is_unique")
+  userAgent String?   @map("user_agent")
+  country   String?
+  city      String?
+  clickedAt DateTime  @default(now()) @map("clicked_at")
+
+  @@index([linkId, clickedAt])
+  @@map("analytics_events")
+}
+
+model HourlyAggregate {
+  id           Int       @id @default(autoincrement())
+  linkId       Int       @map("link_id")
+  link         ShortLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  timeBucket   DateTime  @map("time_bucket")
+  clicks       Int       @default(0)
+  uniqueClicks Int       @default(0) @map("unique_clicks")
+
+  @@unique([linkId, timeBucket])
+  @@map("hourly_aggregates")
 }
