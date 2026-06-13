@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { notFound } from "next/navigation";
 import { db } from "../../lib/db";
 import { auth } from "../../auth";
@@ -156,8 +156,26 @@ export async function GET(
       );
     }
 
-    // Perform a non-cached 302 Found redirect to the destination longUrl
-    return new NextResponse(null, {
+    // Perform a non-cached 302 Found redirect to the destination longUrl with server-side analytics tracking
+    const cookieName = `flc_visit_${slug}`;
+    const hasVisitedCookie = req.cookies.get(cookieName);
+    const isUnique = !hasVisitedCookie;
+
+    const userAgent = req.headers.get("user-agent");
+    const countryHeader = req.headers.get("x-vercel-ip-country");
+    const cityHeader = req.headers.get("x-vercel-ip-city");
+
+    let country = countryHeader ? countryHeader.trim() : null;
+    let city = null;
+    if (cityHeader) {
+      try {
+        city = decodeURIComponent(cityHeader).trim();
+      } catch {
+        city = cityHeader.trim();
+      }
+    }
+
+    const response = new NextResponse(null, {
       status: 302,
       headers: {
         Location: link.longUrl,
@@ -166,6 +184,63 @@ export async function GET(
         Expires: "0",
       },
     });
+
+    if (isUnique) {
+      response.cookies.set(cookieName, "1", {
+        path: "/",
+        maxAge: 60 * 60 * 24, // 24 hours
+        httpOnly: true,
+        sameSite: "lax",
+      });
+    }
+
+    after(async () => {
+      try {
+        await db.analyticsEvent.create({
+          data: {
+            linkId: link.id,
+            isUnique,
+            userAgent: userAgent ? String(userAgent).substring(0, 500) : null,
+            country,
+            city,
+          },
+        });
+
+        const now = new Date();
+        const timeBucket = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          now.getHours(),
+          0,
+          0,
+          0
+        );
+
+        await db.hourlyAggregate.upsert({
+          where: {
+            linkId_timeBucket: {
+              linkId: link.id,
+              timeBucket,
+            },
+          },
+          update: {
+            clicks: { increment: 1 },
+            uniqueClicks: isUnique ? { increment: 1 } : undefined,
+          },
+          create: {
+            linkId: link.id,
+            timeBucket,
+            clicks: 1,
+            uniqueClicks: isUnique ? 1 : 0,
+          },
+        });
+      } catch (backgroundError) {
+        console.error("Server-side background analytics processing error:", backgroundError);
+      }
+    });
+
+    return response;
   } catch (error) {
     // If it was a Next.js notFound() error, rethrow it so Next.js handles the 404 page
     if (

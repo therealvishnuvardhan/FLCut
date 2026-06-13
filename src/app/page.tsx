@@ -16,6 +16,7 @@ import {
   AlertCircle,
   ChevronDown,
   ChevronUp,
+  BarChart2,
 } from "lucide-react";
 
 interface ShortLink {
@@ -28,6 +29,68 @@ interface ShortLink {
   fallbackUrl: string | null;
   bypassAuth: boolean;
   createdAt: string;
+  analyticsEvents?: Array<{
+    id: number;
+    isUnique: boolean;
+    userAgent: string | null;
+    country: string | null;
+    city: string | null;
+    clickedAt: string;
+  }>;
+}
+
+function parseUserAgent(ua: string | null) {
+  if (!ua) return { browser: "Unknown", os: "Unknown" };
+  let browser = "Other";
+  let os = "Other";
+
+  // Browser check
+  if (ua.includes("Firefox")) browser = "Firefox";
+  else if (ua.includes("Chrome") && !ua.includes("Chromium") && !ua.includes("Edg") && !ua.includes("OPR")) browser = "Chrome";
+  else if (ua.includes("Safari") && !ua.includes("Chrome")) browser = "Safari";
+  else if (ua.includes("Edg")) browser = "Edge";
+  else if (ua.includes("OPR") || ua.includes("Opera")) browser = "Opera";
+  else if (ua.includes("MSIE") || ua.includes("Trident")) browser = "IE";
+
+  // OS check
+  if (ua.includes("Windows")) os = "Windows";
+  else if (ua.includes("Macintosh") || ua.includes("Mac OS")) os = "macOS";
+  else if (ua.includes("Android")) os = "Android";
+  else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
+  else if (ua.includes("Linux")) os = "Linux";
+
+  return { browser, os };
+}
+
+function getBreakdowns(events: Array<{ userAgent: string | null; country: string | null; city: string | null }> = []) {
+  const browsers: { [key: string]: number } = {};
+  const osList: { [key: string]: number } = {};
+  const countries: { [key: string]: number } = {};
+  const cities: { [key: string]: number } = {};
+
+  events.forEach((e) => {
+    const { browser, os } = parseUserAgent(e.userAgent);
+    browsers[browser] = (browsers[browser] || 0) + 1;
+    osList[os] = (osList[os] || 0) + 1;
+
+    const ctry = e.country || "Unknown";
+    countries[ctry] = (countries[ctry] || 0) + 1;
+
+    const cty = e.city || "Unknown";
+    cities[cty] = (cities[cty] || 0) + 1;
+  });
+
+  const sortDesc = (obj: { [key: string]: number }) =>
+    Object.entries(obj)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+  return {
+    browsers: sortDesc(browsers),
+    osList: sortDesc(osList),
+    countries: sortDesc(countries),
+    cities: sortDesc(cities),
+  };
 }
 
 export default function Home() {
@@ -55,6 +118,7 @@ export default function Home() {
   const [myLinks, setMyLinks] = useState<ShortLink[]>([]);
   const [isFetchingLinks, setIsFetchingLinks] = useState(false);
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
+  const [expandedSlug, setExpandedSlug] = useState<string | null>(null);
   const [origin, setOrigin] = useState("");
 
   // Set origin and check URL parameters on mount
@@ -560,12 +624,17 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {myLinks.map((link) => {
                 const active = isLinkActive(link);
+                const totalClicks = link.analyticsEvents?.length || 0;
+                const uniqueClicks = link.analyticsEvents?.filter((e) => e.isUnique).length || 0;
+                const breakdowns = getBreakdowns(link.analyticsEvents || []);
+                const isExpanded = expandedSlug === link.slug;
+
                 return (
                   <div
                     key={link.id}
                     className="bg-neutral-900/35 border border-neutral-800/80 rounded-2xl p-5 hover:border-neutral-700/80 transition-all flex flex-col justify-between gap-4 group relative overflow-hidden"
                   >
-                    <div className="flex flex-col gap-1.5">
+                    <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-mono text-sm font-bold text-white max-w-[50%] truncate">
                           /{link.slug}
@@ -587,12 +656,107 @@ export default function Home() {
                           </span>
                         </div>
                       </div>
+
+                      {/* Click Telemetry Counters */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] bg-neutral-950/60 px-2 py-0.5 rounded border border-neutral-800/80 text-neutral-400 flex items-center gap-1">
+                          Clicks: <strong className="text-white font-mono">{totalClicks}</strong>
+                        </span>
+                        <span className="text-[10px] bg-neutral-950/60 px-2 py-0.5 rounded border border-neutral-800/80 text-neutral-400 flex items-center gap-1">
+                          Unique: <strong className="text-white font-mono">{uniqueClicks}</strong>
+                        </span>
+                      </div>
+
                       <p className="text-xs text-neutral-400 truncate" title={link.longUrl}>
                         {link.longUrl}
                       </p>
                       <span className="text-[10px] text-neutral-500 font-mono">
                         Created: {new Date(link.createdAt).toLocaleDateString()}
                       </span>
+
+                      {/* Expanded Analytics Drawer */}
+                      {isExpanded && (
+                        <div className="mt-2 pt-3 border-t border-neutral-800/60 text-xs flex flex-col gap-3 animate-fadeIn">
+                          <div className="grid grid-cols-2 gap-3">
+                            {/* Browsers & OS */}
+                            <div className="bg-neutral-950/30 border border-neutral-800/60 rounded-xl p-2.5 flex flex-col gap-1.5">
+                              <span className="font-bold text-neutral-400 border-b border-neutral-800 pb-0.5 text-[10px] uppercase tracking-wider">Browsers & OS</span>
+                              {totalClicks === 0 ? (
+                                <span className="text-neutral-600 text-[10px] italic py-1">No clicks yet</span>
+                              ) : (
+                                <div className="flex flex-col gap-1 text-[10px]">
+                                  {breakdowns.browsers.map(([name, count]) => (
+                                    <div key={name} className="flex justify-between text-neutral-300">
+                                      <span className="truncate max-w-[80px]">{name}</span>
+                                      <span className="font-mono text-neutral-500">{count}</span>
+                                    </div>
+                                  ))}
+                                  <div className="border-t border-neutral-800/40 my-1"></div>
+                                  {breakdowns.osList.map(([name, count]) => (
+                                    <div key={name} className="flex justify-between text-neutral-300">
+                                      <span className="truncate max-w-[80px]">{name}</span>
+                                      <span className="font-mono text-neutral-500">{count}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Locations */}
+                            <div className="bg-neutral-950/30 border border-neutral-800/60 rounded-xl p-2.5 flex flex-col gap-1.5">
+                              <span className="font-bold text-neutral-400 border-b border-neutral-800 pb-0.5 text-[10px] uppercase tracking-wider">Locations</span>
+                              {totalClicks === 0 ? (
+                                <span className="text-neutral-600 text-[10px] italic py-1">No clicks yet</span>
+                              ) : (
+                                <div className="flex flex-col gap-1 text-[10px]">
+                                  {breakdowns.countries.map(([name, count]) => (
+                                    <div key={name} className="flex justify-between text-neutral-300">
+                                      <span className="truncate max-w-[80px]">{name}</span>
+                                      <span className="font-mono text-neutral-500">{count}</span>
+                                    </div>
+                                  ))}
+                                  <div className="border-t border-neutral-800/40 my-1"></div>
+                                  {breakdowns.cities.map(([name, count]) => (
+                                    <div key={name} className="flex justify-between text-neutral-300">
+                                      <span className="truncate max-w-[80px]">{name}</span>
+                                      <span className="font-mono text-neutral-500">{count}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Recent Activity Logs */}
+                          <div className="bg-neutral-950/30 border border-neutral-800/60 rounded-xl p-2.5 flex flex-col gap-1.5">
+                            <span className="font-bold text-neutral-400 border-b border-neutral-800 pb-0.5 text-[10px] uppercase tracking-wider">Recent Activity</span>
+                            {totalClicks === 0 ? (
+                              <span className="text-neutral-600 text-[10px] italic py-1">No clicks yet</span>
+                            ) : (
+                              <div className="flex flex-col gap-1.5 text-[10px] max-h-24 overflow-y-auto">
+                                {(link.analyticsEvents || []).slice(0, 5).map((e, idx) => {
+                                  const { browser } = parseUserAgent(e.userAgent);
+                                  const loc = [e.city, e.country].filter(Boolean).join(", ") || "Unknown Location";
+                                  return (
+                                    <div key={e.id || idx} className="flex justify-between items-center text-neutral-300 border-b border-neutral-900/40 pb-1 last:border-b-0">
+                                      <div className="flex flex-col text-left">
+                                        <span className="truncate max-w-[150px] font-medium">{loc}</span>
+                                        <span className="text-[8px] text-neutral-500 font-mono">{browser}</span>
+                                      </div>
+                                      <div className="flex flex-col items-end">
+                                        <span className="text-neutral-400">{new Date(e.clickedAt).toLocaleDateString()}</span>
+                                        {e.isUnique && (
+                                          <span className="text-[7px] text-emerald-400 font-bold uppercase tracking-wider font-mono">Unique</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex gap-2 border-t border-neutral-800/60 pt-3 mt-1">
@@ -623,6 +787,18 @@ export default function Home() {
                       >
                         <ExternalLink className="h-3.5 w-3.5" />
                       </a>
+
+                      {/* Analytics Toggle Button */}
+                      <button
+                        type="button"
+                        onClick={() => setExpandedSlug(isExpanded ? null : link.slug)}
+                        className={`bg-neutral-900 hover:bg-neutral-800 border ${
+                          isExpanded ? "border-violet-500/50 text-violet-400" : "border-neutral-800 text-neutral-500 hover:text-white"
+                        } py-2 px-3 rounded-xl text-xs transition-colors flex items-center justify-center cursor-pointer`}
+                        title="View Analytics"
+                      >
+                        <BarChart2 className="h-3.5 w-3.5" />
+                      </button>
 
                       <button
                         type="button"

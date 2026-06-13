@@ -12,6 +12,13 @@ export async function GET(req: NextRequest) {
         where: {
           creatorId: session.user.id,
         },
+        include: {
+          analyticsEvents: {
+            orderBy: {
+              clickedAt: "desc",
+            },
+          },
+        },
         orderBy: {
           createdAt: "desc",
         },
@@ -40,6 +47,13 @@ export async function GET(req: NextRequest) {
       where: {
         slug: {
           in: slugs,
+        },
+      },
+      include: {
+        analyticsEvents: {
+          orderBy: {
+            clickedAt: "desc",
+          },
         },
       },
       orderBy: {
