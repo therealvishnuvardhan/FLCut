@@ -19,6 +19,7 @@ import {
   ChevronUp,
   BarChart2,
   RefreshCw,
+  Pencil,
 } from "lucide-react";
 
 interface ShortLink {
@@ -123,6 +124,16 @@ export default function Home() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [origin, setOrigin] = useState("");
 
+  // Editing state
+  const [editingLink, setEditingLink] = useState<ShortLink | null>(null);
+  const [editLongUrl, setEditLongUrl] = useState("");
+  const [editMaxClicks, setEditMaxClicks] = useState("");
+  const [editValidFrom, setEditValidFrom] = useState("");
+  const [editValidUntil, setEditValidUntil] = useState("");
+  const [editRequireAuth, setEditRequireAuth] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+
   // Set origin and check URL parameters on mount
   useEffect(() => {
     setOrigin(window.location.origin);
@@ -186,6 +197,73 @@ export default function Home() {
 
     fetchLinks();
   }, [localSlugs, isLoggedIn, refreshTrigger]);
+
+  const startEditing = (link: ShortLink) => {
+    setEditingLink(link);
+    setEditLongUrl(link.longUrl);
+    setEditMaxClicks(link.maxClicks !== null ? String(link.maxClicks) : "");
+    
+    // Format dates to datetime-local format (YYYY-MM-DDTHH:MM)
+    const formatDate = (dateStr: string | null) => {
+      if (!dateStr) return "";
+      const d = new Date(dateStr);
+      const tzOffset = d.getTimezoneOffset() * 60000;
+      return (new Date(d.getTime() - tzOffset)).toISOString().slice(0, 16);
+    };
+    
+    setEditValidFrom(formatDate(link.validFrom));
+    setEditValidUntil(formatDate(link.validUntil));
+    setEditRequireAuth(!link.bypassAuth);
+    setEditError(null);
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingLink) return;
+
+    setIsUpdating(true);
+    setEditError(null);
+
+    try {
+      const payload: any = {
+        slug: editingLink.slug,
+        longUrl: editLongUrl.trim(),
+        bypassAuth: !editRequireAuth,
+      };
+
+      payload.validFrom = editValidFrom ? new Date(editValidFrom).toISOString() : null;
+      payload.validUntil = editValidUntil ? new Date(editValidUntil).toISOString() : null;
+      payload.maxClicks = editMaxClicks !== undefined && editMaxClicks !== "" ? parseInt(editMaxClicks, 10) : null;
+
+      const res = await fetch("/api/links", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setEditError(data.error || "Failed to update link configurations.");
+        return;
+      }
+
+      // Update link list locally
+      setMyLinks((prev) =>
+        prev.map((link) => (link.slug === editingLink.slug ? data : link))
+      );
+
+      // Close modal
+      setEditingLink(null);
+    } catch (err) {
+      console.error(err);
+      setEditError("Failed to connect to server. Please try again.");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   const handleShorten = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -289,6 +367,11 @@ export default function Home() {
     const now = new Date();
     if (link.validFrom && now < new Date(link.validFrom)) return false;
     if (link.validUntil && now > new Date(link.validUntil)) return false;
+    
+    // Check click limit expiration
+    const totalClicks = link.analyticsEvents?.length || 0;
+    if (link.maxClicks !== null && totalClicks >= link.maxClicks) return false;
+    
     return true;
   };
 
@@ -738,6 +821,16 @@ export default function Home() {
                         <BarChart2 className="h-3.5 w-3.5" />
                       </Link>
 
+                      {/* Edit Configurations Button */}
+                      <button
+                        type="button"
+                        onClick={() => startEditing(link)}
+                        className="bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-500 hover:text-white py-2 px-3 rounded-xl text-xs transition-colors flex items-center justify-center cursor-pointer"
+                        title="Edit Configurations"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+
                       <button
                         type="button"
                         onClick={() => handleDelete(link.slug)}
@@ -759,6 +852,120 @@ export default function Home() {
       <footer className="border-t border-neutral-900 py-6 bg-neutral-950/20 text-center text-xs text-neutral-500 z-10">
         <p>&copy; {new Date().getFullYear()} Finite Loop Club. All rights reserved.</p>
       </footer>
+      {/* Edit Modal Overlay */}
+      {editingLink && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl flex flex-col gap-6 relative animate-scaleIn">
+            <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
+              <h4 className="text-lg font-bold text-white flex items-center gap-2">
+                <Pencil className="h-4 w-4 text-violet-400" />
+                Edit Configurations: <span className="font-mono text-neutral-400 text-sm">/{editingLink.slug}</span>
+              </h4>
+            </div>
+
+            <form onSubmit={handleUpdate} className="flex flex-col gap-4">
+              {/* Destination URL */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-neutral-300">Destination URL</label>
+                <input
+                  type="text"
+                  value={editLongUrl}
+                  onChange={(e) => setEditLongUrl(e.target.value)}
+                  className="bg-neutral-950/80 border border-neutral-800 rounded-lg p-2.5 text-xs text-neutral-300 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                  required
+                />
+              </div>
+
+              {/* Dynamic Pickers grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-neutral-400">Valid From</label>
+                  <input
+                    type="datetime-local"
+                    value={editValidFrom}
+                    onChange={(e) => setEditValidFrom(e.target.value)}
+                    onClick={(e) => {
+                      try { e.currentTarget.showPicker(); } catch {}
+                    }}
+                    className="bg-neutral-950/80 border border-neutral-800 rounded-lg p-2.5 text-xs text-neutral-300 focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer text-left w-full"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-neutral-400">Valid Until</label>
+                  <input
+                    type="datetime-local"
+                    value={editValidUntil}
+                    onChange={(e) => setEditValidUntil(e.target.value)}
+                    onClick={(e) => {
+                      try { e.currentTarget.showPicker(); } catch {}
+                    }}
+                    className="bg-neutral-950/80 border border-neutral-800 rounded-lg p-2.5 text-xs text-neutral-300 focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer text-left w-full"
+                  />
+                </div>
+              </div>
+
+              {/* Click Cap Limit */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-neutral-400">Max Clicks (Cap Limit)</label>
+                <input
+                  type="number"
+                  placeholder="Unlimited"
+                  value={editMaxClicks}
+                  onChange={(e) => setEditMaxClicks(e.target.value)}
+                  className="bg-neutral-950/80 border border-neutral-800 rounded-lg p-2.5 text-xs text-neutral-300 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                />
+              </div>
+
+              {/* Secure FLCut auth toggle */}
+              <label className="flex items-center gap-3 cursor-pointer select-none border-t border-neutral-800/60 pt-4 mt-2">
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={editRequireAuth}
+                    onChange={(e) => setEditRequireAuth(e.target.checked)}
+                    className="sr-only"
+                  />
+                  <div className={`w-10 h-5 rounded-full transition-colors ${editRequireAuth ? 'bg-violet-600' : 'bg-neutral-800'}`}></div>
+                  <div className={`absolute top-0.5 left-0.5 bg-white w-4 h-4 rounded-full transition-transform ${editRequireAuth ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-semibold text-neutral-300">Require FLCut Login</span>
+                  <span className="text-[10px] text-neutral-500">
+                    Force visitors to log in on FLCut.
+                  </span>
+                </div>
+              </label>
+
+              {/* Edit Error message */}
+              {editError && (
+                <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-3 rounded-lg flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4" />
+                  {editError}
+                </div>
+              )}
+
+              {/* Form Buttons */}
+              <div className="flex gap-2 border-t border-neutral-800 pt-4 mt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingLink(null)}
+                  className="flex-1 bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-750 text-neutral-400 hover:text-white text-xs font-semibold py-2.5 px-4 rounded-xl transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdating}
+                  className="flex-1 bg-gradient-to-r from-violet-600 to-cyan-500 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition-all hover:opacity-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow"
+                >
+                  {isUpdating ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
