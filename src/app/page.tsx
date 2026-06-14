@@ -446,7 +446,12 @@ export default function Home() {
                       type="datetime-local"
                       value={validFrom}
                       onChange={(e) => setValidFrom(e.target.value)}
-                      className="bg-neutral-950/80 border border-neutral-800 rounded-lg p-2 text-xs text-neutral-300 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                      onClick={(e) => {
+                        try {
+                          e.currentTarget.showPicker();
+                        } catch (err) {}
+                      }}
+                      className="bg-neutral-950/80 border border-neutral-800 rounded-lg p-2 text-xs text-neutral-300 focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer w-full text-left"
                     />
                   </div>
 
@@ -458,7 +463,12 @@ export default function Home() {
                       type="datetime-local"
                       value={validUntil}
                       onChange={(e) => setValidUntil(e.target.value)}
-                      className="bg-neutral-950/80 border border-neutral-800 rounded-lg p-2 text-xs text-neutral-300 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                      onClick={(e) => {
+                        try {
+                          e.currentTarget.showPicker();
+                        } catch (err) {}
+                      }}
+                      className="bg-neutral-950/80 border border-neutral-800 rounded-lg p-2 text-xs text-neutral-300 focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer w-full text-left"
                     />
                   </div>
 
