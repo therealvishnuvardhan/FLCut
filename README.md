@@ -1,39 +1,28 @@
-# FLCut - Dynamic URL Shortener with Advanced Telemetry
+# FLCut - An Advanced URL Shortener
 
-FLCut is a high-performance URL shortener built for the Finite Loop Club Hackfest 2026. It goes beyond basic link shortening by giving you scheduled lifespans, custom alias collision resolution, click caps with fallback URLs, visitor authentication guards, and a real-time analytics dashboard with pre-aggregated hourly telemetry.
+FLCut is a powerful URL shortening app that has been created for the Finite Loop Club Hackfest 2026. FLCut provides more than just a simple way to shorten a link; it allows you to have scheduled lifetimes for your links, custom alias (aka "friendly") collision resolution, a click cap and fallback URL, visitor authentication requirements prior to redirecting users to the shortened URL, and a real-time tracking dashboard with pre-aggregated hourly telemetry.
 
-Hosted Application: https://flcut.vercel.app
-GitHub Repository: https://github.com/therealvishnuvardhan/FLCut
+Application URL: https://flcut.vercel.app
+---
+Code Repository: https://github.com/therealvishnuvardhan/FLCut
 
 ---
 
-## What It Does
+What FLCut Can Do for You
 
-- Shorten any long URL into a clean, shareable link under the flcut.vercel.app domain
-- Set a custom alias like `/hackfest26` instead of an auto-generated code
-- Schedule exactly when a link goes live and when it expires, down to the minute
-- Cap how many times a link redirects, and send overflow visitors to a fallback URL
-- Require visitors to authenticate via Google before they can be redirected
-- Track every visit with real-time analytics: total clicks, unique clicks, device, browser, OS, country, city, referrer, and time-series trends
-- Create and manage links without signing in, with guest links stored in browser local storage
-
----
-
-## Tech Stack
-
-- Next.js 16 (App Router) with TypeScript
-- Prisma ORM with PostgreSQL for persistent storage
-- Upstash Redis for caching and rate limiting
-- Auth.js (NextAuth.js v5) for Google OAuth authentication
-- Hashids for non-guessable auto-generated slug encoding
-- Tailwind CSS v4 for styling
-- Vercel for deployment and edge geolocation headers
+Shorten any long URL and make it into a nice clean and shareable link within the flcut.vercel.app domain
+Provide a custom alias for your shortened links (for example: //flcut.vercel.app/hackfest26)
+Set specific schedule for when your link will go live (be available to users) and when it expires (is no longer valid), even down to the minute
+Limit the number of times a link will redirect and redirect any visitors to another (fall-back) URL if the click limit has been exceeded
+Require authentication using Google before allowing an individual to be redirected to the link
+Obtain real-time trackable statistics on every visit (total clicks, unique clicks by device, browser, OS, country, city, referrer, time series trends)
+Create and manage links without having to "sign in", and the links created/managed are stored in the guest's browser local storage
 
 ---
 
 ## Prerequisites
 
-Before running this locally, make sure you have the following ready:
+Before running this locally, make sure you have the mentioned or else will be a trouble:
 
 - Node.js version 18 or above
 - npm (comes with Node.js)
@@ -187,6 +176,8 @@ The separation between AnalyticsEvent and HourlyAggregate is intentional. Analyt
 
 **Guest Mode** — Visitors who are not signed in can still create and use short links. Their links are stored in browser local storage and visible on the landing page. Signing in upgrades them to a persistent dashboard with full analytics.
 
+**Sync Clicks Button** — Modern browsers often throttle or completely pause background intervals when a tab is put in the background or the computer sleeps. A manual button lets you wake it up and force and sync clicks instantly.
+
 ---
 
 ## Core Challenge Solutions
@@ -227,6 +218,32 @@ Analytics tracking should not slow down the redirect experience for the end user
 When a user visits a short link, the server resolves the dynamic slug and immediately renders a client-side redirection splash card. This card initiates the redirect using a client-side timer while sending telemetry data in the background using navigator.sendBeacon (or fallback fetch keepalive) to `/api/v1/track-hit`. 
 
 On the server side, `/api/v1/track-hit` processes the request using the Next.js after() API. This allows the server to respond with a 202 Accepted status immediately, handing off the database writes (raw log insertion and hourly aggregation upserts) to run in the background.
+
+---
+
+## Design Questions & Decisions
+
+### 1. Data Model Rationale
+Our schema was structured to balance raw visitor logging with query performance. Rather than scanning and counting millions of individual click rows on every dashboard load, the HourlyAggregate table acts as a pre-computed rollup. By writing to this rollup table in the background using after(), the user dashboard loads in milliseconds even for high-traffic links.
+
+### 2. If you only had 4 hours, what would you build first, and what would you cut?
+If time was constrained to 4 hours, the priority would be the minimum viable redirect engine:
+- Built First: Sequential sequence-based short code generation (using Hashids), basic database storage for slug-to-URL mapping, and the dynamic redirect route.
+- What to Cut: The Google OAuth sign-in flow (using local storage to save created links for anonymous users), the edit link modal, interactive charts on the analytics page, and geographical header resolution.
+
+### 3. Name one tradeoff you made and what you gave up.
+Tradeoff: Browser-Based Cookie Tracking for Uniqueness.
+Uniqueness is determined by checking for a browser-specific cookie (flc_visit_ [slug]). If a visitor opens the same link on a different browser, opens it in incognito mode, or clears their cookies, they will be counted as a new unique visit.
+- What We Gave Up: Persistent device fingerprinting or IP hashing.
+- Rationale: IP address storage introduces privacy compliance concerns (such as GDPR), while canvas fingerprinting is blockable and can degrade page load performance. Using browser cookies is standard, lightweight, and respects user privacy while remaining accurate enough for standard event metrics.
+
+### 4. What did you assume because the PRD did not tell you?
+- Anonymous Link Creation: We assumed users should be able to create short links without signing up. We implemented local storage tracking so that non-logged-in users can see their shortened links on the landing page, prompting them to sign in only if they need persistence across devices.
+- User-Friendly Redirection Guard Page: We assumed that displaying a clean, branded "Inactive" page explaining why a link is unavailable (expired, capped, or pending) is a much better user experience than throwing a generic 404 error page.
+- Profanity Filtering: We assumed that public custom slugs would be vulnerable to abuse, so we integrated obscenity-based moderation to prevent users from binding offensive keywords to our domain.
+- Collision UI Suggestions: We assumed that simply throwing an error on slug collision would feel broken, so we built a dynamic suggestion engine to automatically recommend available alternatives.
+
+---
 
 #### Metrics Captured
 - Total vs Unique Clicks: We set a cookie (flc_visit_ [slug]) on the visitor's browser for 24 hours. If the cookie is present, isUnique is set to false. If the cookie is absent, it is logged as unique.
