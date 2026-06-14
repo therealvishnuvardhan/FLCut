@@ -4,6 +4,9 @@ import { db } from "../../lib/db";
 import { auth } from "../../auth";
 import { RedirectSplash } from "./RedirectSplash";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function SlugPage({
   params,
 }: {
@@ -52,7 +55,14 @@ export default async function SlugPage({
         limitReached = true;
       }
     } catch (redisError) {
-      console.error("Failed to increment click count in Redis:", redisError);
+      console.warn("Failed to check click limit in Redis, falling back to database query:", redisError);
+      // Fallback to counting analyticsEvents in the database
+      const dbClicksCount = await db.analyticsEvent.count({
+        where: { linkId: link.id },
+      });
+      if (dbClicksCount >= link.maxClicks) {
+        limitReached = true;
+      }
     }
     if (limitReached) {
       redirect(`/inactive?slug=${slug}&reason=limit`);
