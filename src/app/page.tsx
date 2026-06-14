@@ -781,6 +781,33 @@ export default function Home() {
                         Created: {new Date(link.createdAt).toLocaleDateString()}
                       </span>
 
+                      {!active && (
+                        <div className="text-[10px] text-red-400/90 mt-2 bg-red-950/10 border border-red-900/20 rounded-lg p-2.5 flex items-center gap-1.5 font-mono select-none">
+                          <AlertCircle className="h-3.5 w-3.5 flex-shrink-0 text-red-450 animate-pulse" />
+                          <span className="leading-tight">
+                            {(() => {
+                              const now = new Date();
+                              const isTimeExceeded = link.validUntil && now > new Date(link.validUntil);
+                              const isCapHit = link.maxClicks !== null && totalClicks >= link.maxClicks;
+                              if (isTimeExceeded && isCapHit) {
+                                return `Expired: Time limit exceeded (ended ${new Date(link.validUntil!).toLocaleString()}) & click cap hit (${link.maxClicks} max).`;
+                              }
+                              if (isTimeExceeded) {
+                                return `Expired: Time limit exceeded (ended ${new Date(link.validUntil!).toLocaleString()}).`;
+                              }
+                              if (isCapHit) {
+                                return `Expired: Click limit cap hit (${link.maxClicks} max).`;
+                              }
+                              const isPending = link.validFrom && now < new Date(link.validFrom);
+                              if (isPending) {
+                                return `Pending: Validity starts on ${new Date(link.validFrom!).toLocaleString()}.`;
+                              }
+                              return "Inactive: Link is unavailable.";
+                            })()}
+                          </span>
+                        </div>
+                      )}
+
                     </div>
 
                     <div className="flex gap-2 border-t border-neutral-800/60 pt-3 mt-1">
