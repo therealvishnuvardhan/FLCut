@@ -23,18 +23,6 @@ export default async function SlugPage({
     notFound();
   }
 
-  // If visitor auth is required, block anonymous access
-  if (!link.bypassAuth) {
-    const session = await auth();
-    if (!session?.user) {
-      const headersList = await headers();
-      const host = headersList.get("host") || "localhost:3000";
-      const proto = headersList.get("x-forwarding-proto") || "http";
-      const redirectUrl = `/auth/login?callbackUrl=${encodeURIComponent(`${proto}://${host}/${slug}`)}`;
-      redirect(redirectUrl);
-    }
-  }
-
   // Check validity dates
   const now = new Date();
   if (link.validFrom && now < new Date(link.validFrom)) {
@@ -66,6 +54,18 @@ export default async function SlugPage({
     }
     if (limitReached) {
       redirect(`/inactive?slug=${slug}&reason=limit`);
+    }
+  }
+
+  // If visitor auth is required, block anonymous access
+  if (!link.bypassAuth) {
+    const session = await auth();
+    if (!session?.user) {
+      const headersList = await headers();
+      const host = headersList.get("host") || "localhost:3000";
+      const proto = headersList.get("x-forwarding-proto") || "http";
+      const redirectUrl = `/auth/login?callbackUrl=${encodeURIComponent(`${proto}://${host}/${slug}`)}`;
+      redirect(redirectUrl);
     }
   }
 
