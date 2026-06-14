@@ -72,35 +72,100 @@ export async function GET(
     <link href="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4" rel="stylesheet" />
     <style>
       body {
-        background-color: #0a0a0a;
+        background-color: #050505;
         color: #ffffff;
+      }
+      @keyframes pulseGlow {
+        0%, 100% { transform: scale(1); opacity: 0.15; }
+        50% { transform: scale(1.15); opacity: 0.3; }
+      }
+      @keyframes floatCard {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+      }
+      @keyframes fillProgress {
+        0% { width: 0%; }
+        100% { width: 100%; }
+      }
+      @keyframes textEntrance {
+        0% { opacity: 0; transform: translateY(10px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes drawShield {
+        to { stroke-dashoffset: 0; }
+      }
+      .animate-glow-violet {
+        animation: pulseGlow 4s ease-in-out infinite;
+      }
+      .animate-glow-cyan {
+        animation: pulseGlow 4s ease-in-out infinite 2s;
+      }
+      .animate-float {
+        animation: floatCard 4s ease-in-out infinite;
+      }
+      .animate-progress {
+        animation: fillProgress 1500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+      .animate-text-1 {
+        animation: textEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      .animate-text-2 {
+        animation: textEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+        opacity: 0;
+      }
+      .animate-text-3 {
+        animation: textEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+        opacity: 0;
+      }
+      .shield-path {
+        stroke-dasharray: 200;
+        stroke-dashoffset: 200;
+        animation: drawShield 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
       }
     </style>
   </head>
-  <body class="flex min-h-screen flex-col items-center justify-center bg-radial from-neutral-900 to-black px-6 font-sans">
-    <div class="relative flex flex-col items-center max-w-sm text-center">
-      <!-- Glow decoration -->
-      <div class="absolute top-[-50px] left-[-50px] h-32 w-32 rounded-full bg-violet-600/20 blur-2xl animate-pulse"></div>
-      <div class="absolute bottom-[-50px] right-[-50px] h-32 w-32 rounded-full bg-cyan-600/20 blur-2xl animate-pulse"></div>
+  <body class="flex min-h-screen flex-col items-center justify-center bg-radial from-neutral-900 to-black px-6 font-sans overflow-hidden relative">
+    <!-- Glow decorations -->
+    <div class="absolute top-1/4 left-1/4 h-[350px] w-[350px] rounded-full bg-violet-600/10 blur-[100px] animate-glow-violet pointer-events-none"></div>
+    <div class="absolute bottom-1/4 right-1/4 h-[350px] w-[350px] rounded-full bg-cyan-600/10 blur-[100px] animate-glow-cyan pointer-events-none"></div>
 
-      <div class="relative bg-neutral-900/40 backdrop-blur-xl border border-neutral-800 rounded-3xl p-8 shadow-2xl flex flex-col items-center gap-6 w-full">
-        <!-- Logo badge -->
-        <div class="h-12 w-12 rounded-2xl bg-gradient-to-tr from-violet-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-violet-500/10">
-          <span class="font-black text-black text-xl">FL</span>
+    <div class="relative flex flex-col items-center w-full max-w-sm text-center">
+      <div class="relative bg-neutral-900/30 backdrop-blur-3xl border border-neutral-800/80 rounded-3xl p-8 sm:p-10 shadow-2xl flex flex-col items-center gap-7 w-full animate-float">
+        
+        <!-- Header Tag -->
+        <div class="absolute top-[-16px] left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-neutral-950 border border-neutral-800 shadow-md flex items-center gap-1.5 select-none">
+          <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="font-mono text-[8px] font-bold text-neutral-400 tracking-widest uppercase">FLCut Secure</span>
         </div>
 
-        <div class="flex flex-col gap-2">
-          <h2 class="text-xl font-bold tracking-tight text-white">Redirecting you safely</h2>
-          <p class="text-neutral-400 text-xs truncate max-w-[280px]">Destination: ${link.longUrl}</p>
+        <!-- Security SVG Icon -->
+        <div class="relative flex items-center justify-center h-16 w-16 bg-neutral-950/60 rounded-2xl border border-neutral-800/85 shadow-inner">
+          <svg class="h-9 w-9 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path class="shield-path" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            <path class="shield-path" stroke-width="2.5" d="m9 11 2 2 4-4" style="animation-delay: 0.4s;" />
+          </svg>
+          <!-- Pulsing dot -->
+          <span class="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
+          </span>
         </div>
 
-        <!-- Loader -->
-        <div class="relative h-10 w-10 flex items-center justify-center">
-          <div class="absolute inset-0 rounded-full border-4 border-neutral-800"></div>
-          <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-violet-500 border-r-cyan-400 animate-spin"></div>
+        <!-- Redirection Info -->
+        <div class="flex flex-col gap-2 text-center w-full">
+          <h2 class="text-xl font-bold tracking-tight text-white animate-text-1">Redirecting you safely</h2>
+          <p class="text-neutral-400 text-xs truncate max-w-[280px] font-medium animate-text-2 mx-auto" title="${link.longUrl}">
+            Destination: <span class="text-cyan-400 font-mono text-[11px]">${link.longUrl}</span>
+          </p>
         </div>
 
-        <p class="text-[10px] text-neutral-500 font-mono tracking-wider">FLCUT SECURE LINK</p>
+        <!-- Progress bar loader -->
+        <div class="w-full flex flex-col gap-2.5 items-center animate-text-3">
+          <div class="w-full bg-neutral-950/80 rounded-full h-1.5 overflow-hidden border border-neutral-850">
+            <div class="bg-gradient-to-r from-violet-600 to-cyan-400 h-full rounded-full animate-progress"></div>
+          </div>
+          <span class="text-[9px] text-neutral-500 font-mono tracking-widest uppercase">Connecting to destination...</span>
+        </div>
       </div>
     </div>
 
@@ -140,7 +205,7 @@ export async function GET(
 
         setTimeout(function() {
           window.location.replace(longUrl);
-        }, 750);
+        }, 1500);
       })();
     </script>
   </body>
