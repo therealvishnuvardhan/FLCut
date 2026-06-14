@@ -197,15 +197,41 @@ export default function AnalyticsPage({
     return true;
   };
 
-  // SVG Chart: Click Activity Grouped by Day (last 7 days)
+  // SVG Chart: Click Activity Grouped by Day (7-day intervals starting from link creation)
   const getDailyClickChartData = () => {
-    const last7Days = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      return d.toISOString().split("T")[0];
-    }).reverse();
+    if (!link) return { data: [], maxCount: 5 };
 
-    const dailyCounts = last7Days.reduce((acc, dateStr) => {
+    // Normalize link creation date to midnight local time
+    const createdDate = new Date(link.createdAt);
+    const startDate = new Date(
+      createdDate.getFullYear(),
+      createdDate.getMonth(),
+      createdDate.getDate()
+    );
+
+    // Normalize today to midnight local time
+    const currentDate = new Date();
+    const today = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      currentDate.getDate()
+    );
+
+    // Calculate days passed since creation
+    const diffTime = Math.max(0, today.getTime() - startDate.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    // Determine the week block offset (shifts by 7 days once crossed)
+    const weekBlock = Math.floor(diffDays / 7);
+    
+    // Generate the 7 days for the current week block
+    const daysToShow = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(startDate);
+      d.setDate(d.getDate() + (weekBlock * 7) + i);
+      return d.toISOString().split("T")[0];
+    });
+
+    const dailyCounts = daysToShow.reduce((acc, dateStr) => {
       acc[dateStr] = 0;
       return acc;
     }, {} as Record<string, number>);
@@ -217,7 +243,7 @@ export default function AnalyticsPage({
       }
     });
 
-    const data = last7Days.map((dateStr) => {
+    const data = daysToShow.map((dateStr) => {
       const dateObj = new Date(dateStr);
       const label = dateObj.toLocaleDateString(undefined, { month: "short", day: "numeric" });
       return { label, count: dailyCounts[dateStr] };
@@ -403,7 +429,7 @@ export default function AnalyticsPage({
             <div className="flex items-center justify-between border-b border-neutral-850 pb-3">
               <h3 className="font-bold text-white text-sm flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-violet-400" />
-                Click Trends (Last 7 Days)
+                Click Activity (Current 7-Day Window)
               </h3>
             </div>
             
