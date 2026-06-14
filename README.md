@@ -237,18 +237,22 @@ Uniqueness is determined by checking for a browser-specific cookie (flc_visit_ [
 - What We Gave Up: Persistent device fingerprinting or IP hashing.
 - Rationale: IP address storage introduces privacy compliance concerns (such as GDPR), while canvas fingerprinting is blockable and can degrade page load performance. Using browser cookies is standard, lightweight, and respects user privacy while remaining accurate enough for standard event metrics.
 
-### 4. What did you assume because the PRD did not tell you?
-- Anonymous Link Creation: We assumed users should be able to create short links without signing up. We implemented local storage tracking so that non-logged-in users can see their shortened links on the landing page, prompting them to sign in only if they need persistence across devices.
-- User-Friendly Redirection Guard Page: We assumed that displaying a clean, branded "Inactive" page explaining why a link is unavailable (expired, capped, or pending) is a much better user experience than throwing a generic 404 error page.
-- Profanity Filtering: We assumed that public custom slugs would be vulnerable to abuse, so we integrated obscenity-based moderation to prevent users from binding offensive keywords to our domain.
-- Collision UI Suggestions: We assumed that simply throwing an error on slug collision would feel broken, so we built a dynamic suggestion engine to automatically recommend available alternatives.
+### 4. Assumptions made because the PRD did not say
 
----
+**Who can create links.** The PRD described a tool for club events but did not say whether link creation is for organisers only or anyone. The assumption was that anyone should be able to shorten links without signing up, with local storage tracking so guest users see their links on the landing page. Signing in is required only for persistent management and analytics.
+
+**The inactive link experience.** Rather than returning a generic 404 when a link is expired, capped, or not yet active, FLCut shows a branded page explaining specifically why the link is unavailable. This was assumed to be a better user experience even though the PRD did not specify it.
+
+**Profanity filtering.** Public custom slugs are vulnerable to abuse since they appear as part of the domain. A profanity filter was added to prevent inappropriate words from being bound to the flcut domain without any explicit PRD requirement.
+
+**Collision suggestions.** Returning a raw error on slug collision would feel broken to a user who spent time picking a name. The suggestion engine was built on the assumption that giving users three working alternatives immediately is a significantly better experience than telling them to try again and figure it out themselves.
+
+
 
 #### Metrics Captured
 - Total vs Unique Clicks: We set a cookie (flc_visit_ [slug]) on the visitor's browser for 24 hours. If the cookie is present, isUnique is set to false. If the cookie is absent, it is logged as unique.
 - Geography: Geolocation (Country and City) is resolved via Vercel Edge Headers (x-vercel-ip-country and x-vercel-ip-city) which are populated by Vercel edge routers.
-- User Agent Parsing: We parse navigator.userAgent to categorize visits by Device (Mobile, Tablet, Desktop), Browser (Chrome, Safari, Firefox, Edge, Opera), and Operating System (iOS, Android, Windows, macOS, Linux).
+- User Agent Parsing: We parse and naviage user agent to categorize visits by Device (Mobile, Tablet, Desktop), Browser (Chrome, Safari, Firefox, Edge, Opera), and Operating System (iOS, Android, Windows, macOS, Linux).
 - Bot and Scraper Filtering: To avoid inflating click logs, we can match user agent strings against common bot patterns (e.g. Googlebot, Twitterbot, Discordbot, Bingbot). If a scraper is detected, the event can be ignored or flagged, preventing artificial traffic spikes.
 
 ## Design Decisions and Tradeoffs
@@ -259,17 +263,6 @@ Uniqueness is determined by a browser cookie, not by IP address or device finger
 
 What was given up is cross-browser and cross-device accuracy. What was gained is simplicity, no IP address storage (which avoids GDPR exposure), and a behaviour that matches what most analytics tools including Google Analytics use by default. For a hackfest tool measuring event registrations, this is accurate enough.
 
-### Assumptions made because the PRD did not say
-
-**Who can create links.** The PRD described a tool for club events but did not say whether link creation is for organisers only or anyone. The assumption was that anyone should be able to shorten links without signing up, with local storage tracking so guest users see their links on the landing page. Signing in is required only for persistent management and analytics.
-
-**The inactive link experience.** Rather than returning a generic 404 when a link is expired, capped, or not yet active, FLCut shows a branded page explaining specifically why the link is unavailable. This was assumed to be a better user experience even though the PRD did not specify it.
-
-**Profanity filtering.** Public custom slugs are vulnerable to abuse since they appear as part of the domain. A profanity filter was added to prevent inappropriate words from being bound to the flcut domain without any explicit PRD requirement.
-
-**Collision suggestions.** Returning a raw error on slug collision would feel broken to a user who spent time picking a name. The suggestion engine was built on the assumption that giving users three working alternatives immediately is a significantly better experience than telling them to try again and figure it out themselves.
-
----
 
 ## Live Demo
 
