@@ -382,19 +382,17 @@ export default function Home() {
   };
 
   return (
-    <div className={`min-h-screen bg-transparent flex flex-col font-sans relative overflow-hidden transition-colors duration-500 ${
-      isDark ? "text-neutral-100" : "text-neutral-900"
-    }`}>
+    <div className={`min-h-screen bg-transparent flex flex-col font-sans relative overflow-hidden transition-colors duration-500 ${isDark ? "text-neutral-100" : "text-neutral-900"
+      }`}>
       {/* Background Decorative Gradients */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full dark:bg-violet-900/10 light:bg-violet-500/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full dark:bg-cyan-900/10 light:bg-cyan-500/5 blur-[120px] pointer-events-none" />
 
       {/* Premium Glassmorphic Navbar with subtle accent line */}
-      <header className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-all duration-500 shadow-md ${
-        isDark 
-          ? "border-violet-900/20 bg-neutral-950/70 shadow-violet-950/5" 
+      <header className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-all duration-500 shadow-md ${isDark
+          ? "border-violet-900/20 bg-neutral-950/70 shadow-violet-950/5"
           : "border-violet-200/40 bg-white/70 shadow-violet-100/5"
-      }`}>
+        }`}>
         {/* Subtle Bottom Accent Glow Line */}
         <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-violet-500/25 to-transparent" />
 
@@ -405,9 +403,8 @@ export default function Home() {
                 <span className="font-black text-black text-lg">FL</span>
               </div>
               <div>
-                <span className={`font-bold text-lg leading-tight tracking-tight block ${
-                  isDark ? "text-white" : "text-neutral-900"
-                }`}>
+                <span className={`font-bold text-lg leading-tight tracking-tight block ${isDark ? "text-white" : "text-neutral-900"
+                  }`}>
                   FLCut
                 </span>
               </div>
@@ -418,9 +415,8 @@ export default function Home() {
             {/* About Navigation Link */}
             <Link
               href="/#about"
-              className={`text-sm font-semibold transition-colors cursor-pointer ${
-                isDark ? "text-neutral-300 hover:text-white" : "text-neutral-600 hover:text-black"
-              }`}
+              className={`text-sm font-semibold transition-colors cursor-pointer ${isDark ? "text-neutral-300 hover:text-white" : "text-neutral-600 hover:text-black"
+                }`}
             >
               About
             </Link>
@@ -429,11 +425,10 @@ export default function Home() {
             <button
               onClick={toggleTheme}
               aria-label="Toggle Theme"
-              className={`p-2 rounded-xl border transition-all cursor-pointer ${
-                isDark 
-                  ? "bg-neutral-900 border-neutral-800 text-yellow-400 hover:bg-neutral-800" 
+              className={`p-2 rounded-xl border transition-all cursor-pointer ${isDark
+                  ? "bg-neutral-900 border-neutral-800 text-yellow-400 hover:bg-neutral-800"
                   : "bg-white border-neutral-200 text-violet-600 hover:bg-neutral-50 shadow-sm"
-              }`}
+                }`}
             >
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
@@ -464,28 +459,24 @@ export default function Home() {
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12 flex flex-col gap-12 z-10">
         {/* Hero Area */}
         <div className="text-center flex flex-col gap-4">
-          <h2 className={`text-4xl sm:text-5xl font-extrabold tracking-tight leading-none ${
-            isDark ? "text-white" : "text-neutral-900"
-          }`}>
+          <h2 className={`text-4xl sm:text-5xl font-extrabold tracking-tight leading-none ${isDark ? "text-white" : "text-neutral-900"
+            }`}>
             Shorten Links with <span className={`story-script-regular text-violet-500 dark:text-violet-400 text-5xl sm:text-6xl md:text-7xl block sm:inline-block ml-1 font-normal tracking-wide drop-shadow-[0_2px_8px_rgba(139,92,246,0.2)]`}>Precision</span>
           </h2>
-          <p className={`text-base max-w-xl mx-auto leading-relaxed ${
-            isDark ? "text-neutral-400" : "text-neutral-600"
-          }`}>
+          <p className={`text-base max-w-xl mx-auto leading-relaxed ${isDark ? "text-neutral-400" : "text-neutral-600"
+            }`}>
             Create fast, clean, and customizable short links instantly. Monitor your creations right in your {isLoggedIn ? "creator account" : "browser"} dashboard.
           </p>
         </div>
 
         {/* Shortener Core Card */}
-        <div className={`rounded-3xl p-6 md:p-8 backdrop-blur-xl shadow-2xl relative transition-all duration-300 ${
-          isDark ? "bg-neutral-900/50 border-neutral-800/80" : "bg-white/60 border-neutral-200/80"
-        }`}>
+        <div className={`rounded-3xl p-6 md:p-8 backdrop-blur-xl shadow-2xl relative transition-all duration-300 ${isDark ? "bg-neutral-900/50 border-neutral-800/80" : "bg-white/60 border-neutral-200/80"
+          }`}>
           <form onSubmit={handleShorten} className="flex flex-col gap-6">
             {/* Long URL Input */}
             <div className="flex flex-col gap-2">
-              <label className={`text-sm font-semibold flex items-center gap-2 ${
-                isDark ? "text-neutral-300" : "text-neutral-700"
-              }`}>
+              <label className={`text-sm font-semibold flex items-center gap-2 ${isDark ? "text-neutral-300" : "text-neutral-700"
+                }`}>
                 <Link2 className={`h-4 w-4 ${isDark ? "text-violet-400" : "text-violet-500"}`} />
                 Destination URL
               </label>
@@ -495,11 +486,10 @@ export default function Home() {
                   placeholder="https://example.com/very-long-link-to-shorten"
                   value={longUrl}
                   onChange={(e) => setLongUrl(e.target.value)}
-                  className={`w-full border rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all text-sm pr-12 ${
-                    isDark
+                  className={`w-full border rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all text-sm pr-12 ${isDark
                       ? "bg-neutral-950/80 border-neutral-800 text-neutral-100 placeholder-neutral-500"
                       : "bg-neutral-50/80 border-neutral-300 text-neutral-900 placeholder-neutral-400"
-                  }`}
+                    }`}
                   required
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500">
@@ -511,19 +501,16 @@ export default function Home() {
             {/* Custom Slug Input */}
             <div className="flex flex-col gap-2">
               <div className="flex justify-between items-center">
-                <label className={`text-sm font-semibold flex items-center gap-2 ${
-                  isDark ? "text-neutral-300" : "text-neutral-700"
-                }`}>
+                <label className={`text-sm font-semibold flex items-center gap-2 ${isDark ? "text-neutral-300" : "text-neutral-700"
+                  }`}>
                   <Sparkles className={`h-4 w-4 ${isDark ? "text-cyan-400" : "text-cyan-500"}`} />
                   Custom Slug <span className={`font-normal text-xs ${isDark ? "text-neutral-500" : "text-neutral-400"}`}>(optional)</span>
                 </label>
               </div>
-              <div className={`flex rounded-xl overflow-hidden border focus-within:ring-2 focus-within:ring-violet-500/50 focus-within:border-violet-500 transition-all ${
-                isDark ? "border-neutral-800 bg-neutral-950/80" : "border-neutral-300 bg-neutral-50/80"
-              }`}>
-                <span className={`px-4 flex items-center text-xs font-mono border-r select-none ${
-                  isDark ? "bg-neutral-900 text-neutral-400 border-neutral-800" : "bg-neutral-100 text-neutral-500 border-neutral-300"
+              <div className={`flex rounded-xl overflow-hidden border focus-within:ring-2 focus-within:ring-violet-500/50 focus-within:border-violet-500 transition-all ${isDark ? "border-neutral-800 bg-neutral-950/80" : "border-neutral-300 bg-neutral-50/80"
                 }`}>
+                <span className={`px-4 flex items-center text-xs font-mono border-r select-none ${isDark ? "bg-neutral-900 text-neutral-400 border-neutral-800" : "bg-neutral-100 text-neutral-500 border-neutral-300"
+                  }`}>
                   {origin ? origin.replace(/^https?:\/\//i, "") : "flcut.club"}/
                 </span>
                 <input
@@ -531,9 +518,8 @@ export default function Home() {
                   placeholder="custom-slug"
                   value={customSlug}
                   onChange={(e) => setCustomSlug(e.target.value)}
-                  className={`w-full bg-transparent py-3 px-4 focus:outline-none text-sm font-mono ${
-                    isDark ? "text-neutral-100 placeholder-neutral-600" : "text-neutral-900 placeholder-neutral-400"
-                  }`}
+                  className={`w-full bg-transparent py-3 px-4 focus:outline-none text-sm font-mono ${isDark ? "text-neutral-100 placeholder-neutral-600" : "text-neutral-900 placeholder-neutral-400"
+                    }`}
                 />
               </div>
             </div>
@@ -543,9 +529,8 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setShowAdvanced(!showAdvanced)}
-                className={`flex items-center gap-2 text-xs font-semibold transition-colors cursor-pointer ${
-                  isDark ? "text-neutral-400 hover:text-white" : "text-neutral-500 hover:text-neutral-950"
-                }`}
+                className={`flex items-center gap-2 text-xs font-semibold transition-colors cursor-pointer ${isDark ? "text-neutral-400 hover:text-white" : "text-neutral-500 hover:text-neutral-950"
+                  }`}
               >
                 <Sliders className="h-3.5 w-3.5" />
                 Advanced Controls (Validity & Expiration)
@@ -571,9 +556,8 @@ export default function Home() {
                           e.currentTarget.showPicker();
                         } catch (err) { }
                       }}
-                      className={`border rounded-lg p-2 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer w-full text-left ${
-                        isDark ? "bg-neutral-950/80 border-neutral-800 text-neutral-300" : "bg-neutral-50 border-neutral-300 text-neutral-800"
-                      }`}
+                      className={`border rounded-lg p-2 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer w-full text-left ${isDark ? "bg-neutral-950/80 border-neutral-800 text-neutral-300" : "bg-neutral-50 border-neutral-300 text-neutral-800"
+                        }`}
                     />
                   </div>
 
@@ -590,9 +574,8 @@ export default function Home() {
                           e.currentTarget.showPicker();
                         } catch (err) { }
                       }}
-                      className={`border rounded-lg p-2 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer w-full text-left ${
-                        isDark ? "bg-neutral-950/80 border-neutral-800 text-neutral-300" : "bg-neutral-50 border-neutral-300 text-neutral-800"
-                      }`}
+                      className={`border rounded-lg p-2 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer w-full text-left ${isDark ? "bg-neutral-950/80 border-neutral-800 text-neutral-300" : "bg-neutral-50 border-neutral-300 text-neutral-800"
+                        }`}
                     />
                   </div>
 
@@ -605,18 +588,16 @@ export default function Home() {
                       placeholder="e.g. 100"
                       value={maxClicks}
                       onChange={(e) => setMaxClicks(e.target.value)}
-                      className={`border rounded-lg p-2 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 ${
-                        isDark
+                      className={`border rounded-lg p-2 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 ${isDark
                           ? "bg-neutral-950/80 border-neutral-800 text-neutral-300 placeholder-neutral-600"
                           : "bg-neutral-50 border-neutral-300 text-neutral-800 placeholder-neutral-400"
-                      }`}
+                        }`}
                     />
                   </div>
 
                   {/* Visitor authentication toggle */}
-                  <div className={`flex flex-col gap-1.5 md:col-span-2 border-t pt-4 mt-2 ${
-                    isDark ? "border-neutral-800/60" : "border-neutral-200"
-                  }`}>
+                  <div className={`flex flex-col gap-1.5 md:col-span-2 border-t pt-4 mt-2 ${isDark ? "border-neutral-800/60" : "border-neutral-200"
+                    }`}>
                     <label className="flex items-center gap-3 cursor-pointer select-none">
                       <div className="relative">
                         <input
@@ -732,13 +713,11 @@ export default function Home() {
         {/* Local Dashboard */}
         <div className="flex flex-col gap-6">
           <div className="flex justify-between items-center border-b border-neutral-200 dark:border-neutral-900 pb-4">
-            <h3 className={`text-xl font-bold flex items-center gap-2.5 ${
-              isDark ? "text-white" : "text-neutral-900"
-            }`}>
-              {isLoggedIn ? "Account Dashboard" : "My Links"}
-              <span className={`border text-xs px-2 py-0.5 rounded-full font-mono font-normal ${
-                isDark ? "bg-neutral-900 border-neutral-800 text-neutral-400" : "bg-neutral-100 border-neutral-200 text-neutral-500"
+            <h3 className={`text-xl font-bold flex items-center gap-2.5 ${isDark ? "text-white" : "text-neutral-900"
               }`}>
+              {isLoggedIn ? "Account Dashboard" : "My Links"}
+              <span className={`border text-xs px-2 py-0.5 rounded-full font-mono font-normal ${isDark ? "bg-neutral-900 border-neutral-800 text-neutral-400" : "bg-neutral-100 border-neutral-200 text-neutral-500"
+                }`}>
                 {myLinks.length}
               </span>
             </h3>
@@ -746,11 +725,10 @@ export default function Home() {
             <button
               onClick={() => setRefreshTrigger((prev) => prev + 1)}
               disabled={isFetchingLinks}
-              className={`border p-2 rounded-xl transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 text-xs font-semibold select-none shadow-sm ${
-                isDark
+              className={`border p-2 rounded-xl transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 text-xs font-semibold select-none shadow-sm ${isDark
                   ? "bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-white"
                   : "bg-neutral-50 border-neutral-200 hover:bg-neutral-100 text-neutral-600 hover:text-neutral-900"
-              }`}
+                }`}
               title="Refresh Dashboard"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${isFetchingLinks ? "animate-spin text-cyan-500 dark:text-cyan-400" : ""}`} />
@@ -763,9 +741,8 @@ export default function Home() {
               {[1, 2].map((i) => (
                 <div
                   key={i}
-                  className={`border rounded-2xl p-5 flex flex-col gap-4 animate-pulse ${
-                    isDark ? "bg-neutral-900/30 border-neutral-800/50" : "bg-white/40 border-neutral-200/50"
-                  }`}
+                  className={`border rounded-2xl p-5 flex flex-col gap-4 animate-pulse ${isDark ? "bg-neutral-900/30 border-neutral-800/50" : "bg-white/40 border-neutral-200/50"
+                    }`}
                 >
                   <div className={`h-5 rounded w-1/2 ${isDark ? "bg-neutral-800" : "bg-neutral-200"}`} />
                   <div className={`h-4 rounded w-3/4 ${isDark ? "bg-neutral-800" : "bg-neutral-200"}`} />
@@ -774,12 +751,10 @@ export default function Home() {
               ))}
             </div>
           ) : myLinks.length === 0 ? (
-            <div className={`text-center py-16 border rounded-3xl flex flex-col items-center gap-3 ${
-              isDark ? "bg-neutral-900/10 border-neutral-900" : "bg-neutral-50/30 border-neutral-200"
-            }`}>
-              <div className={`h-12 w-12 rounded-full border flex items-center justify-center ${
-                isDark ? "bg-neutral-900 border-neutral-800 text-neutral-500" : "bg-neutral-100 border-neutral-200 text-neutral-400"
+            <div className={`text-center py-16 border rounded-3xl flex flex-col items-center gap-3 ${isDark ? "bg-neutral-900/10 border-neutral-900" : "bg-neutral-50/30 border-neutral-200"
               }`}>
+              <div className={`h-12 w-12 rounded-full border flex items-center justify-center ${isDark ? "bg-neutral-900 border-neutral-800 text-neutral-500" : "bg-neutral-100 border-neutral-200 text-neutral-400"
+                }`}>
                 <Link2 className="h-6 w-6" />
               </div>
               <h4 className={`font-semibold ${isDark ? "text-neutral-300" : "text-neutral-700"}`}>No links shortened yet</h4>
@@ -798,14 +773,13 @@ export default function Home() {
                 const uniqueClicks = link.analyticsEvents?.filter((e) => e.isUnique).length || 0;
 
                 return (
-                   <div
-                     key={link.id}
-                     className={`border rounded-2xl p-5 shadow-sm transition-all flex flex-col justify-between gap-4 group relative overflow-hidden ${
-                       isDark
-                         ? "bg-neutral-900/35 border-neutral-800/80 hover:border-neutral-700/80"
-                         : "bg-white/60 border-neutral-200/80 hover:border-neutral-305"
-                     }`}
-                   >
+                  <div
+                    key={link.id}
+                    className={`border rounded-2xl p-5 shadow-sm transition-all flex flex-col justify-between gap-4 group relative overflow-hidden ${isDark
+                        ? "bg-neutral-900/35 border-neutral-800/80 hover:border-neutral-700/80"
+                        : "bg-white/60 border-neutral-200/80 hover:border-neutral-305"
+                      }`}
+                  >
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-mono text-sm font-bold text-neutral-900 dark:text-white max-w-[50%] truncate">
@@ -945,15 +919,12 @@ export default function Home() {
       {/* Edit Modal Overlay */}
       {editingLink && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
-          <div className={`rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl flex flex-col gap-6 relative animate-scaleIn border ${
-            isDark ? "bg-neutral-900 border-neutral-800" : "bg-white border-neutral-200"
-          }`}>
-            <div className={`flex justify-between items-center border-b pb-3 ${
-              isDark ? "border-neutral-800" : "border-neutral-200"
+          <div className={`rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl flex flex-col gap-6 relative animate-scaleIn border ${isDark ? "bg-neutral-900 border-neutral-800" : "bg-white border-neutral-200"
             }`}>
-              <h4 className={`text-lg font-bold flex items-center gap-2 ${
-                isDark ? "text-white" : "text-neutral-900"
+            <div className={`flex justify-between items-center border-b pb-3 ${isDark ? "border-neutral-800" : "border-neutral-200"
               }`}>
+              <h4 className={`text-lg font-bold flex items-center gap-2 ${isDark ? "text-white" : "text-neutral-900"
+                }`}>
                 <Pencil className="h-4 w-4 text-violet-500 dark:text-violet-400" />
                 Edit Configurations: <span className={`font-mono text-xs ${isDark ? "text-neutral-400" : "text-neutral-500"}`}>/{editingLink.slug}</span>
               </h4>
@@ -967,9 +938,8 @@ export default function Home() {
                   type="text"
                   value={editLongUrl}
                   onChange={(e) => setEditLongUrl(e.target.value)}
-                  className={`border rounded-lg p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 ${
-                    isDark ? "bg-neutral-950/80 border-neutral-800 text-neutral-300" : "bg-neutral-50 border-neutral-300 text-neutral-900"
-                  }`}
+                  className={`border rounded-lg p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 ${isDark ? "bg-neutral-950/80 border-neutral-800 text-neutral-300" : "bg-neutral-50 border-neutral-300 text-neutral-900"
+                    }`}
                   required
                 />
               </div>
@@ -985,9 +955,8 @@ export default function Home() {
                     onClick={(e) => {
                       try { e.currentTarget.showPicker(); } catch { }
                     }}
-                    className={`border rounded-lg p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer text-left w-full ${
-                      isDark ? "bg-neutral-950/80 border-neutral-800 text-neutral-300" : "bg-neutral-50 border-neutral-300 text-neutral-900"
-                    }`}
+                    className={`border rounded-lg p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer text-left w-full ${isDark ? "bg-neutral-950/80 border-neutral-800 text-neutral-300" : "bg-neutral-50 border-neutral-300 text-neutral-900"
+                      }`}
                   />
                 </div>
 
@@ -1000,9 +969,8 @@ export default function Home() {
                     onClick={(e) => {
                       try { e.currentTarget.showPicker(); } catch { }
                     }}
-                    className={`border rounded-lg p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer text-left w-full ${
-                      isDark ? "bg-neutral-950/80 border-neutral-800 text-neutral-300" : "bg-neutral-50 border-neutral-300 text-neutral-900"
-                    }`}
+                    className={`border rounded-lg p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer text-left w-full ${isDark ? "bg-neutral-950/80 border-neutral-800 text-neutral-300" : "bg-neutral-50 border-neutral-300 text-neutral-900"
+                      }`}
                   />
                 </div>
               </div>
@@ -1015,16 +983,14 @@ export default function Home() {
                   placeholder="Unlimited"
                   value={editMaxClicks}
                   onChange={(e) => setEditMaxClicks(e.target.value)}
-                  className={`border rounded-lg p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 ${
-                    isDark ? "bg-neutral-950/80 border-neutral-800 text-neutral-305 placeholder-neutral-600" : "bg-neutral-50 border-neutral-300 text-neutral-900 placeholder-neutral-400"
-                  }`}
+                  className={`border rounded-lg p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 ${isDark ? "bg-neutral-950/80 border-neutral-800 text-neutral-305 placeholder-neutral-600" : "bg-neutral-50 border-neutral-300 text-neutral-900 placeholder-neutral-400"
+                    }`}
                 />
               </div>
 
               {/* Secure FLCut auth toggle */}
-              <label className={`flex items-center gap-3 cursor-pointer select-none border-t pt-4 mt-2 ${
-                isDark ? "border-neutral-800/60" : "border-neutral-200"
-              }`}>
+              <label className={`flex items-center gap-3 cursor-pointer select-none border-t pt-4 mt-2 ${isDark ? "border-neutral-800/60" : "border-neutral-200"
+                }`}>
                 <div className="relative">
                   <input
                     type="checkbox"
@@ -1056,11 +1022,10 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => setEditingLink(null)}
-                  className={`flex-1 border text-xs font-semibold py-2.5 px-4 rounded-xl transition-colors cursor-pointer ${
-                    isDark
+                  className={`flex-1 border text-xs font-semibold py-2.5 px-4 rounded-xl transition-colors cursor-pointer ${isDark
                       ? "bg-neutral-950 hover:bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
                       : "bg-neutral-50 hover:bg-neutral-100 border-neutral-200 text-neutral-500 hover:text-neutral-900"
-                  }`}
+                    }`}
                 >
                   Cancel
                 </button>

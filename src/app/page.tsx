@@ -37,12 +37,12 @@ export default function LandingPage() {
       if (!logoRef.current || !scissorsRef.current) return;
       const logoRect = logoRef.current.getBoundingClientRect();
       const scissorsRect = scissorsRef.current.getBoundingClientRect();
-      
+
       setLogoPos({
         x: logoRect.right + 10 + window.scrollX,
         y: logoRect.top + logoRect.height / 2 + window.scrollY,
       });
-      
+
       setScissorsPos({
         x: scissorsRect.left + scissorsRect.width * 0.5 + window.scrollX,
         y: scissorsRect.top + scissorsRect.height * 0.45 + window.scrollY,
@@ -50,7 +50,7 @@ export default function LandingPage() {
     };
 
     handleUpdate();
-    
+
     // Set layout settling fallbacks
     const t1 = setTimeout(handleUpdate, 100);
     const t2 = setTimeout(handleUpdate, 500);
@@ -125,7 +125,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen relative flex flex-col bg-transparent">
-      
+
       {/* Absolute overlay chain drawing between logo and scissors */}
       {logoPos.x > 0 && scissorsPos.x > 0 && (
         <div className="absolute inset-0 w-full h-[650px] pointer-events-none -z-10 hidden lg:block overflow-hidden">
@@ -141,39 +141,39 @@ export default function LandingPage() {
             </defs>
 
             {/* Ambient Cyan Under-Glow for premium neon gradient feel */}
-            <line 
-              x1={logoPos.x} 
-              y1={logoPos.y} 
-              x2={scissorsPos.x} 
-              y2={scissorsPos.y} 
-              stroke={isDark ? "#06b6d4" : "#0891b2"} 
-              strokeWidth="11" 
+            <line
+              x1={logoPos.x}
+              y1={logoPos.y}
+              x2={scissorsPos.x}
+              y2={scissorsPos.y}
+              stroke={isDark ? "#06b6d4" : "#0891b2"}
+              strokeWidth="11"
               strokeLinecap="round"
               filter="url(#chain-neon-glow)"
               className="opacity-30"
             />
             {/* Glowing neon chain blur (Pink) */}
-            <line 
-              x1={logoPos.x} 
-              y1={logoPos.y} 
-              x2={scissorsPos.x} 
-              y2={scissorsPos.y} 
-              stroke={isDark ? "#db2777" : "#ec4899"} 
-              strokeWidth="8" 
-              strokeDasharray="14 24" 
+            <line
+              x1={logoPos.x}
+              y1={logoPos.y}
+              x2={scissorsPos.x}
+              y2={scissorsPos.y}
+              stroke={isDark ? "#db2777" : "#ec4899"}
+              strokeWidth="8"
+              strokeDasharray="14 24"
               strokeLinecap="round"
               filter="url(#chain-neon-glow)"
               className="opacity-50"
             />
             {/* Foreground crisp chain */}
-            <line 
-              x1={logoPos.x} 
-              y1={logoPos.y} 
-              x2={scissorsPos.x} 
-              y2={scissorsPos.y} 
-              stroke={isDark ? "#ec4899" : "#db2777"} 
-              strokeWidth="5" 
-              strokeDasharray="14 24" 
+            <line
+              x1={logoPos.x}
+              y1={logoPos.y}
+              x2={scissorsPos.x}
+              y2={scissorsPos.y}
+              stroke={isDark ? "#ec4899" : "#db2777"}
+              strokeWidth="5"
+              strokeDasharray="14 24"
               strokeLinecap="round"
               className="opacity-95"
             />
@@ -182,16 +182,15 @@ export default function LandingPage() {
       )}
 
       {/* Premium Glassmorphic Navbar with subtle accent line */}
-      <header className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-all duration-500 shadow-md ${
-        isDark 
-          ? "border-violet-900/20 bg-neutral-950/70 shadow-violet-950/5" 
+      <header className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-all duration-500 shadow-md ${isDark
+          ? "border-violet-900/20 bg-neutral-950/70 shadow-violet-950/5"
           : "border-violet-200/40 bg-white/70 shadow-violet-100/5"
-      }`}>
+        }`}>
         {/* Subtle Bottom Accent Glow Line */}
         <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-violet-500/25 to-transparent" />
-        
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between relative">
-          
+
           {/* Logo Brand */}
           <div ref={logoRef} className="flex items-center gap-3 group relative z-10 select-none">
             <Link href="/app" className="flex items-center gap-3">
@@ -208,13 +207,12 @@ export default function LandingPage() {
 
           {/* Nav Controls */}
           <div className="flex items-center gap-4">
-            
+
             {/* About Navigation Link */}
             <button
               onClick={scrollToAbout}
-              className={`text-sm font-semibold transition-colors cursor-pointer ${
-                isDark ? "text-neutral-300 hover:text-white" : "text-neutral-600 hover:text-black"
-              }`}
+              className={`text-sm font-semibold transition-colors cursor-pointer ${isDark ? "text-neutral-300 hover:text-white" : "text-neutral-600 hover:text-black"
+                }`}
             >
               About
             </button>
@@ -223,11 +221,10 @@ export default function LandingPage() {
             <button
               onClick={toggleTheme}
               aria-label="Toggle Theme"
-              className={`p-2 rounded-xl border transition-all cursor-pointer ${
-                isDark 
-                  ? "bg-neutral-900 border-neutral-800 text-yellow-400 hover:bg-neutral-800" 
+              className={`p-2 rounded-xl border transition-all cursor-pointer ${isDark
+                  ? "bg-neutral-900 border-neutral-800 text-yellow-400 hover:bg-neutral-800"
                   : "bg-white border-neutral-200 text-violet-600 hover:bg-neutral-50 shadow-sm"
-              }`}
+                }`}
             >
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
@@ -260,10 +257,10 @@ export default function LandingPage() {
       {/* Hero Section Container */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-28 pb-16 sm:pt-36 sm:pb-24 flex flex-col justify-center relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          
+
           {/* Left Text Block */}
           <div className="lg:col-span-7 flex flex-col justify-center text-left gap-6 lg:pr-4">
-            
+
             {/* Main Brand Title */}
             <div>
               <h1 className="story-script-regular text-8xl sm:text-9xl tracking-normal text-transparent bg-clip-text bg-gradient-to-r from-violet-500 via-purple-500 to-cyan-500 drop-shadow-[0_2px_15px_rgba(139,92,246,0.15)] leading-[0.85] select-none pb-4">
@@ -275,9 +272,8 @@ export default function LandingPage() {
             </div>
 
             {/* Subheading/Details */}
-            <p className={`text-base sm:text-lg max-w-xl leading-relaxed transition-colors duration-500 ${
-              isDark ? "text-neutral-400" : "text-neutral-600"
-            }`}>
+            <p className={`text-base sm:text-lg max-w-xl leading-relaxed transition-colors duration-500 ${isDark ? "text-neutral-400" : "text-neutral-600"
+              }`}>
               Create clean, branded links with instant telemetry. Take command of your redirects with scheduler validation gates, absolute click cap caps, and robust Google authorization filters.
             </p>
 
@@ -296,18 +292,17 @@ export default function LandingPage() {
 
           {/* Right Visual Block */}
           <div ref={scissorsRef} className="lg:col-span-5 flex justify-center items-center relative">
-            
+
             {/* Dynamic visual aura */}
-            <div className={`absolute h-80 w-80 rounded-full blur-3xl pointer-events-none -z-10 transition-all duration-700 ${
-              isDark ? "bg-violet-600/10" : "bg-violet-200/30"
-            }`} />
-            
+            <div className={`absolute h-80 w-80 rounded-full blur-3xl pointer-events-none -z-10 transition-all duration-700 ${isDark ? "bg-violet-600/10" : "bg-violet-200/30"
+              }`} />
+
             {/* Integrated Vector chain-cutting-scissors graphic */}
             <div className="relative select-none p-4">
-              <svg 
-                className="w-72 h-72 sm:w-96 sm:h-96 relative drop-shadow-[0_15px_40px_rgba(139,92,246,0.25)] animate-float" 
-                viewBox="0 0 200 200" 
-                fill="none" 
+              <svg
+                className="w-72 h-72 sm:w-96 sm:h-96 relative drop-shadow-[0_15px_40px_rgba(139,92,246,0.25)] animate-float"
+                viewBox="0 0 200 200"
+                fill="none"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 {/* Embedded gradients and filters for glowing chrome/neon design */}
@@ -319,12 +314,12 @@ export default function LandingPage() {
                     <stop offset="85%" stopColor="#94a3b8" />
                     <stop offset="100%" stopColor="#334155" />
                   </linearGradient>
-                  
+
                   <filter id="scissors-shadow" x="-30%" y="-30%" width="160%" height="160%">
                     <feDropShadow dx="0" dy="0" stdDeviation="7" floodColor={isDark ? "#a855f7" : "#6366f1"} floodOpacity="0.4" />
                     <feDropShadow dx="3" dy="9" stdDeviation="5" floodColor="#000000" floodOpacity="0.35" />
                   </filter>
-                  
+
                   <filter id="cut-glow" x="-50%" y="-50%" width="200%" height="200%">
                     <feGaussianBlur stdDeviation="3" result="blur" />
                     <feMerge>
@@ -348,16 +343,16 @@ export default function LandingPage() {
 
 
                 {/* Right Chain segment falling away */}
-                <path 
-                  d="M 112 98 L 190 150" 
-                  stroke={isDark ? "#db2777" : "#ec4899"} 
-                  strokeWidth="8.5" 
-                  strokeLinecap="round" 
-                  strokeDasharray="14 18" 
-                  className="opacity-80" 
+                <path
+                  d="M 112 98 L 190 150"
+                  stroke={isDark ? "#db2777" : "#ec4899"}
+                  strokeWidth="8.5"
+                  strokeLinecap="round"
+                  strokeDasharray="14 18"
+                  className="opacity-80"
                   filter="url(#cut-glow)"
                 />
-                
+
                 {/* Spark particles at cut point */}
                 <circle cx="102" cy="92" r="3.5" fill="#fbbf24" filter="url(#cut-glow)" />
                 <path d="M 102 92 L 93 80 M 102 92 L 115 82 M 102 92 L 105 105 M 102 92 L 89 97" stroke="#fbbf24" strokeWidth="2.5" strokeLinecap="round" className="opacity-90" />
@@ -385,23 +380,22 @@ export default function LandingPage() {
                 <circle cx="100" cy="90" r="5" fill={isDark ? "#334155" : "#1e293b"} stroke="#f8fafc" strokeWidth="2" />
               </svg>
             </div>
-            
+
           </div>
 
         </div>
       </main>
 
       {/* About Benefits Section */}
-      <section 
-        id="about" 
-        className={`py-20 border-t scroll-mt-20 transition-colors duration-500 ${
-          isDark 
-            ? "border-neutral-900 bg-neutral-950/40" 
+      <section
+        id="about"
+        className={`py-20 border-t scroll-mt-20 transition-colors duration-500 ${isDark
+            ? "border-neutral-900 bg-neutral-950/40"
             : "border-neutral-100 bg-neutral-50/50"
-        }`}
+          }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col gap-16">
-          
+
           {/* Section Heading */}
           <div className="flex flex-col items-center gap-3">
             <span className="text-xs font-mono font-bold tracking-widest text-violet-500 uppercase">
@@ -415,16 +409,14 @@ export default function LandingPage() {
 
           {/* Grid Layout of Benefits Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            
+
             {/* Card 1: Advanced Analytics */}
-            <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${
-              isDark 
-                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20" 
+            <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${isDark
+                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20"
                 : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
-            }`}>
-              <div className={`p-3.5 rounded-2xl border transition-colors ${
-                isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
               }`}>
+              <div className={`p-3.5 rounded-2xl border transition-colors ${isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
+                }`}>
                 <BarChart3 className="h-6 w-6" />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -434,22 +426,19 @@ export default function LandingPage() {
                   Track clicks, unique creators, countries, browser formats, and operating system metrics on every link.
                 </p>
               </div>
-              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border tracking-wide mt-2 ${
-                isDark ? "bg-violet-500/10 border-violet-500/20 text-violet-400" : "bg-violet-100 border-violet-200 text-violet-700"
-              }`}>
+              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border tracking-wide mt-2 ${isDark ? "bg-violet-500/10 border-violet-500/20 text-violet-400" : "bg-violet-100 border-violet-200 text-violet-700"
+                }`}>
                 MOST POPULAR
               </span>
             </div>
 
             {/* Card 2: Validity Scheduler */}
-            <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${
-              isDark 
-                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20" 
+            <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${isDark
+                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20"
                 : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
-            }`}>
-              <div className={`p-3.5 rounded-2xl border transition-colors ${
-                isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
               }`}>
+              <div className={`p-3.5 rounded-2xl border transition-colors ${isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
+                }`}>
                 <Calendar className="h-6 w-6" />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -459,22 +448,19 @@ export default function LandingPage() {
                   Enforce date ranges. Shortlinks automatically activate and expire at precise scheduled timestamps.
                 </p>
               </div>
-              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border tracking-wide mt-2 ${
-                isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-100 border-emerald-200 text-emerald-700"
-              }`}>
+              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border tracking-wide mt-2 ${isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-100 border-emerald-200 text-emerald-700"
+                }`}>
                 PREMIUM UTILITY
               </span>
             </div>
 
             {/* Card 3: Click Limit Caps */}
-            <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${
-              isDark 
-                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20" 
+            <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${isDark
+                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20"
                 : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
-            }`}>
-              <div className={`p-3.5 rounded-2xl border transition-colors ${
-                isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
               }`}>
+              <div className={`p-3.5 rounded-2xl border transition-colors ${isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
+                }`}>
                 <Zap className="h-6 w-6" />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -484,22 +470,19 @@ export default function LandingPage() {
                   Input a click maximum cap. Once reached, redirect access is terminated instantly to secure destinations.
                 </p>
               </div>
-              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border tracking-wide mt-2 ${
-                isDark ? "bg-amber-500/10 border-amber-500/20 text-amber-400" : "bg-amber-100 border-amber-200 text-amber-700"
-              }`}>
+              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border tracking-wide mt-2 ${isDark ? "bg-amber-500/10 border-amber-500/20 text-amber-400" : "bg-amber-100 border-amber-200 text-amber-700"
+                }`}>
                 ADVANCED GUARD
               </span>
             </div>
 
             {/* Card 4: Custom Slugs */}
-            <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${
-              isDark 
-                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20" 
+            <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${isDark
+                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20"
                 : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
-            }`}>
-              <div className={`p-3.5 rounded-2xl border transition-colors ${
-                isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
               }`}>
+              <div className={`p-3.5 rounded-2xl border transition-colors ${isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
+                }`}>
                 <Sliders className="h-6 w-6" />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -509,22 +492,19 @@ export default function LandingPage() {
                   Bypass standard random hash links. Choose your own distinct slug text to promote brand identification.
                 </p>
               </div>
-              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border tracking-wide mt-2 ${
-                isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700"
-              }`}>
+              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border tracking-wide mt-2 ${isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700"
+                }`}>
                 BRAND CONTROL
               </span>
             </div>
 
             {/* Card 5: Access Controls */}
-            <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${
-              isDark 
-                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20" 
+            <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${isDark
+                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20"
                 : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
-            }`}>
-              <div className={`p-3.5 rounded-2xl border transition-colors ${
-                isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
               }`}>
+              <div className={`p-3.5 rounded-2xl border transition-colors ${isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
+                }`}>
                 <ShieldCheck className="h-6 w-6" />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -534,22 +514,19 @@ export default function LandingPage() {
                   Force visitors to sign in via Google login validation before they can access the final destination.
                 </p>
               </div>
-              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border tracking-wide mt-2 ${
-                isDark ? "bg-violet-500/10 border-violet-500/20 text-violet-400" : "bg-violet-100 border-violet-200 text-violet-700"
-              }`}>
+              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border tracking-wide mt-2 ${isDark ? "bg-violet-500/10 border-violet-500/20 text-violet-400" : "bg-violet-100 border-violet-200 text-violet-700"
+                }`}>
                 SECURITY LEVEL 1
               </span>
             </div>
 
             {/* Card 6: Local Dashboard */}
-            <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${
-              isDark 
-                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20" 
+            <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${isDark
+                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20"
                 : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
-            }`}>
-              <div className={`p-3.5 rounded-2xl border transition-colors ${
-                isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
               }`}>
+              <div className={`p-3.5 rounded-2xl border transition-colors ${isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
+                }`}>
                 <Scissors className="h-6 w-6" />
               </div>
               <div className="flex flex-col gap-1.5">
@@ -559,9 +536,8 @@ export default function LandingPage() {
                   Shorten immediately without accounts. Non-logged users can view their created links stored inside localStorage.
                 </p>
               </div>
-              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border tracking-wide mt-2 ${
-                isDark ? "bg-neutral-500/10 border-neutral-500/20 text-neutral-400" : "bg-neutral-100 border-neutral-200 text-neutral-700"
-              }`}>
+              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border tracking-wide mt-2 ${isDark ? "bg-neutral-500/10 border-neutral-500/20 text-neutral-400" : "bg-neutral-100 border-neutral-200 text-neutral-700"
+                }`}>
                 FREE DEMO
               </span>
             </div>

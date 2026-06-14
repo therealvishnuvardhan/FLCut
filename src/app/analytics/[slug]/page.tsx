@@ -370,19 +370,17 @@ export default function AnalyticsPage({
   const active = isLinkActive();
 
   return (
-    <div className={`min-h-screen bg-transparent flex flex-col font-sans relative overflow-hidden pb-12 transition-colors duration-500 ${
-      isDark ? "text-neutral-100" : "text-neutral-900"
-    }`}>
+    <div className={`min-h-screen bg-transparent flex flex-col font-sans relative overflow-hidden pb-12 transition-colors duration-500 ${isDark ? "text-neutral-100" : "text-neutral-900"
+      }`}>
       {/* Glow decorations */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full dark:bg-violet-900/10 light:bg-violet-500/5 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full dark:bg-cyan-900/10 light:bg-cyan-500/5 blur-[120px] pointer-events-none" />
 
       {/* Premium Glassmorphic Navbar with subtle accent line */}
-      <header className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-all duration-500 shadow-md ${
-        isDark 
-          ? "border-violet-900/20 bg-neutral-950/70 shadow-violet-950/5" 
+      <header className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-all duration-500 shadow-md ${isDark
+          ? "border-violet-900/20 bg-neutral-950/70 shadow-violet-950/5"
           : "border-violet-200/40 bg-white/70 shadow-violet-100/5"
-      }`}>
+        }`}>
         {/* Subtle Bottom Accent Glow Line */}
         <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-violet-500/25 to-transparent" />
 
@@ -390,16 +388,14 @@ export default function AnalyticsPage({
           <div className="flex items-center gap-4">
             <Link
               href="/"
-              className={`border p-2 rounded-xl transition-all cursor-pointer shadow-sm ${
-                isDark ? "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white" : "bg-neutral-50 border-neutral-250 text-neutral-500 hover:text-neutral-900"
-              }`}
+              className={`border p-2 rounded-xl transition-all cursor-pointer shadow-sm ${isDark ? "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white" : "bg-neutral-50 border-neutral-250 text-neutral-500 hover:text-neutral-900"
+                }`}
             >
               <ArrowLeft className="h-4 w-4" />
             </Link>
             <div>
-              <h1 className={`font-bold text-base sm:text-lg flex items-center gap-2 ${
-                isDark ? "text-white" : "text-neutral-900"
-              }`}>
+              <h1 className={`font-bold text-base sm:text-lg flex items-center gap-2 ${isDark ? "text-white" : "text-neutral-900"
+                }`}>
                 FLCut Console
                 <ChevronRight className="h-3.5 w-3.5 text-neutral-400 dark:text-neutral-600" />
                 <span className="font-mono text-violet-500 dark:text-violet-400 text-sm">/{link.slug}</span>
@@ -412,20 +408,18 @@ export default function AnalyticsPage({
             <button
               onClick={toggleTheme}
               aria-label="Toggle Theme"
-              className={`p-2 rounded-xl border transition-all cursor-pointer ${
-                isDark 
-                  ? "bg-neutral-900 border-neutral-800 text-yellow-400 hover:bg-neutral-800" 
+              className={`p-2 rounded-xl border transition-all cursor-pointer ${isDark
+                  ? "bg-neutral-900 border-neutral-800 text-yellow-400 hover:bg-neutral-800"
                   : "bg-white border-neutral-200 text-violet-600 hover:bg-neutral-50 shadow-sm"
-              }`}
+                }`}
             >
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
 
             <button
               onClick={startEditing}
-              className={`border py-2 px-3.5 rounded-xl text-xs transition-all flex items-center gap-1.5 cursor-pointer select-none shadow-sm font-semibold ${
-                isDark ? "bg-neutral-900 border-neutral-800 text-neutral-300 hover:bg-neutral-805" : "bg-neutral-50 border-neutral-250 text-neutral-700 hover:bg-neutral-100"
-              }`}
+              className={`border py-2 px-3.5 rounded-xl text-xs transition-all flex items-center gap-1.5 cursor-pointer select-none shadow-sm font-semibold ${isDark ? "bg-neutral-900 border-neutral-800 text-neutral-300 hover:bg-neutral-805" : "bg-neutral-50 border-neutral-250 text-neutral-700 hover:bg-neutral-100"
+                }`}
             >
               <Pencil className="h-3.5 w-3.5 text-violet-500 dark:text-violet-400" />
               <span>Edit Link</span>
@@ -434,9 +428,8 @@ export default function AnalyticsPage({
             <button
               onClick={() => fetchAnalytics(true)}
               disabled={isRefreshing}
-              className={`border py-2 px-4 rounded-xl text-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 select-none shadow-sm font-semibold ${
-                isDark ? "bg-neutral-900 border-neutral-800 text-neutral-300 hover:bg-neutral-805" : "bg-neutral-50 border-neutral-250 text-neutral-700 hover:bg-neutral-100"
-              }`}
+              className={`border py-2 px-4 rounded-xl text-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 select-none shadow-sm font-semibold ${isDark ? "bg-neutral-900 border-neutral-800 text-neutral-300 hover:bg-neutral-805" : "bg-neutral-50 border-neutral-250 text-neutral-700 hover:bg-neutral-100"
+                }`}
             >
               <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin text-cyan-500 dark:text-cyan-400" : ""}`} />
               {isRefreshing ? "Syncing..." : "Sync Clicks"}
@@ -448,14 +441,12 @@ export default function AnalyticsPage({
       {/* Content Body */}
       <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6 z-10">
         {/* Link Identity Card */}
-        <div className={`border rounded-3xl p-6 backdrop-blur-xl shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-all duration-300 ${
-          isDark ? "bg-neutral-900/50 border-neutral-800/80" : "bg-white/60 border-neutral-200/80"
-        }`}>
+        <div className={`border rounded-3xl p-6 backdrop-blur-xl shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-all duration-300 ${isDark ? "bg-neutral-900/50 border-neutral-800/80" : "bg-white/60 border-neutral-200/80"
+          }`}>
           <div className="flex flex-col gap-2 min-w-0 flex-1">
             <div className="flex items-center gap-3 flex-wrap">
-              <span className={`text-2xl font-black font-mono tracking-tight truncate ${
-                isDark ? "text-white" : "text-neutral-900"
-              }`}>
+              <span className={`text-2xl font-black font-mono tracking-tight truncate ${isDark ? "text-white" : "text-neutral-900"
+                }`}>
                 /{link.slug}
               </span>
               <div className="flex items-center gap-2">
@@ -466,8 +457,8 @@ export default function AnalyticsPage({
                 )}
                 <span
                   className={`text-[9px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider font-mono border ${active
-                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
-                      : "bg-red-500/10 border-red-500/20 text-red-650 dark:text-red-400"
+                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                    : "bg-red-500/10 border-red-500/20 text-red-650 dark:text-red-400"
                     }`}
                 >
                   {active ? "Active" : "Expired"}
@@ -539,33 +530,29 @@ export default function AnalyticsPage({
 
         {/* Highlight Stats Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className={`border rounded-2xl p-5 flex flex-col gap-1.5 shadow-sm ${
-            isDark ? "bg-neutral-900/35 border-neutral-800/80" : "bg-white/60 border-neutral-200/80"
-          }`}>
+          <div className={`border rounded-2xl p-5 flex flex-col gap-1.5 shadow-sm ${isDark ? "bg-neutral-900/35 border-neutral-800/80" : "bg-white/60 border-neutral-200/80"
+            }`}>
             <span className="text-neutral-500 text-xs font-semibold uppercase tracking-wider">Total Clicks</span>
             <span className={`text-3xl font-black font-mono leading-none ${isDark ? "text-white" : "text-neutral-900"}`}>{totalClicks}</span>
             <span className="text-[10px] text-neutral-500 mt-1">Sum of all clicks hit</span>
           </div>
 
-          <div className={`border rounded-2xl p-5 flex flex-col gap-1.5 shadow-sm ${
-            isDark ? "bg-neutral-900/35 border-neutral-800/80" : "bg-white/60 border-neutral-200/80"
-          }`}>
+          <div className={`border rounded-2xl p-5 flex flex-col gap-1.5 shadow-sm ${isDark ? "bg-neutral-900/35 border-neutral-800/80" : "bg-white/60 border-neutral-200/80"
+            }`}>
             <span className="text-neutral-550 text-xs font-semibold uppercase tracking-wider">Unique Clicks</span>
             <span className={`text-3xl font-black font-mono leading-none ${isDark ? "text-cyan-450" : "text-cyan-600"}`}>{uniqueClicks}</span>
             <span className="text-[10px] text-neutral-500 mt-1">Clicks from unique tab sessions</span>
           </div>
 
-          <div className={`border rounded-2xl p-5 flex flex-col gap-1.5 shadow-sm ${
-            isDark ? "bg-neutral-900/35 border-neutral-800/80" : "bg-white/60 border-neutral-200/80"
-          }`}>
+          <div className={`border rounded-2xl p-5 flex flex-col gap-1.5 shadow-sm ${isDark ? "bg-neutral-900/35 border-neutral-800/80" : "bg-white/60 border-neutral-200/80"
+            }`}>
             <span className="text-neutral-550 text-xs font-semibold uppercase tracking-wider">Unique Ratio</span>
             <span className={`text-3xl font-black font-mono leading-none ${isDark ? "text-violet-400" : "text-violet-600"}`}>{conversionRate}%</span>
             <span className="text-[10px] text-neutral-500 mt-1">Unique visitor conversion share</span>
           </div>
 
-          <div className={`border rounded-2xl p-5 flex flex-col gap-1.5 shadow-sm ${
-            isDark ? "bg-neutral-900/35 border-neutral-800/80" : "bg-white/60 border-neutral-200/80"
-          }`}>
+          <div className={`border rounded-2xl p-5 flex flex-col gap-1.5 shadow-sm ${isDark ? "bg-neutral-900/35 border-neutral-800/80" : "bg-white/60 border-neutral-200/80"
+            }`}>
             <span className="text-neutral-550 text-xs font-semibold uppercase tracking-wider">Status & Cap</span>
             <span className={`text-lg font-bold flex items-center gap-1.5 py-1 ${isDark ? "text-white" : "text-neutral-900"}`}>
               {link.maxClicks ? (
@@ -585,12 +572,10 @@ export default function AnalyticsPage({
         {/* Charts & Timeline */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main SVG Click Trend Chart */}
-          <div className={`border rounded-2xl p-6 lg:col-span-2 flex flex-col gap-4 shadow-sm ${
-            isDark ? "bg-neutral-900/35 border-neutral-800/80" : "bg-white/60 border-neutral-200/80"
-          }`}>
-            <div className={`flex items-center justify-between border-b pb-3 ${
-              isDark ? "border-neutral-800" : "border-neutral-200"
+          <div className={`border rounded-2xl p-6 lg:col-span-2 flex flex-col gap-4 shadow-sm ${isDark ? "bg-neutral-900/35 border-neutral-800/80" : "bg-white/60 border-neutral-200/80"
             }`}>
+            <div className={`flex items-center justify-between border-b pb-3 ${isDark ? "border-neutral-800" : "border-neutral-200"
+              }`}>
               <h3 className={`font-bold text-sm flex items-center gap-2 ${isDark ? "text-white" : "text-neutral-900"}`}>
                 <TrendingUp className={`h-4 w-4 ${isDark ? "text-violet-400" : "text-violet-500"}`} />
                 Click Activity (Current 7-Day Window)
@@ -826,12 +811,10 @@ export default function AnalyticsPage({
       {/* Edit Modal Overlay */}
       {isEditing && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
-          <div className={`rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl flex flex-col gap-6 relative animate-scaleIn border ${
-            isDark ? "bg-neutral-900 border-neutral-800" : "bg-white border-neutral-200"
-          }`}>
-            <div className={`flex justify-between items-center border-b pb-3 ${
-              isDark ? "border-neutral-800" : "border-neutral-200"
+          <div className={`rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl flex flex-col gap-6 relative animate-scaleIn border ${isDark ? "bg-neutral-900 border-neutral-800" : "bg-white border-neutral-200"
             }`}>
+            <div className={`flex justify-between items-center border-b pb-3 ${isDark ? "border-neutral-800" : "border-neutral-200"
+              }`}>
               <h4 className={`text-lg font-bold flex items-center gap-2 ${isDark ? "text-white" : "text-neutral-900"}`}>
                 <Pencil className="h-4 w-4 text-violet-500 dark:text-violet-400" />
                 Edit Configurations: <span className={`font-mono text-xs ${isDark ? "text-neutral-450" : "text-neutral-500"}`}>/{link.slug}</span>
@@ -846,9 +829,8 @@ export default function AnalyticsPage({
                   type="text"
                   value={editLongUrl}
                   onChange={(e) => setEditLongUrl(e.target.value)}
-                  className={`border rounded-lg p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 ${
-                    isDark ? "bg-neutral-950/80 border-neutral-800 text-neutral-300" : "bg-neutral-50 border-neutral-300 text-neutral-900"
-                  }`}
+                  className={`border rounded-lg p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 ${isDark ? "bg-neutral-950/80 border-neutral-800 text-neutral-300" : "bg-neutral-50 border-neutral-300 text-neutral-900"
+                    }`}
                   required
                 />
               </div>
@@ -864,9 +846,8 @@ export default function AnalyticsPage({
                     onClick={(e) => {
                       try { e.currentTarget.showPicker(); } catch { }
                     }}
-                    className={`border rounded-lg p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer text-left w-full ${
-                      isDark ? "bg-neutral-950/80 border-neutral-800 text-neutral-300" : "bg-neutral-50 border-neutral-300 text-neutral-900"
-                    }`}
+                    className={`border rounded-lg p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer text-left w-full ${isDark ? "bg-neutral-950/80 border-neutral-800 text-neutral-300" : "bg-neutral-50 border-neutral-300 text-neutral-900"
+                      }`}
                   />
                 </div>
 
@@ -879,9 +860,8 @@ export default function AnalyticsPage({
                     onClick={(e) => {
                       try { e.currentTarget.showPicker(); } catch { }
                     }}
-                    className={`border rounded-lg p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer text-left w-full ${
-                      isDark ? "bg-neutral-950/80 border-neutral-800 text-neutral-300" : "bg-neutral-50 border-neutral-300 text-neutral-900"
-                    }`}
+                    className={`border rounded-lg p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer text-left w-full ${isDark ? "bg-neutral-950/80 border-neutral-800 text-neutral-300" : "bg-neutral-50 border-neutral-300 text-neutral-900"
+                      }`}
                   />
                 </div>
               </div>
@@ -894,16 +874,14 @@ export default function AnalyticsPage({
                   placeholder="Unlimited"
                   value={editMaxClicks}
                   onChange={(e) => setEditMaxClicks(e.target.value)}
-                  className={`border rounded-lg p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 ${
-                    isDark ? "bg-neutral-950/80 border-neutral-800 text-neutral-300 placeholder-neutral-600" : "bg-neutral-50 border-neutral-300 text-neutral-900 placeholder-neutral-400"
-                  }`}
+                  className={`border rounded-lg p-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 ${isDark ? "bg-neutral-950/80 border-neutral-800 text-neutral-300 placeholder-neutral-600" : "bg-neutral-50 border-neutral-300 text-neutral-900 placeholder-neutral-400"
+                    }`}
                 />
               </div>
 
               {/* Secure FLCut auth toggle */}
-              <label className={`flex items-center gap-3 cursor-pointer select-none border-t pt-4 mt-2 ${
-                isDark ? "border-neutral-800/60" : "border-neutral-200"
-              }`}>
+              <label className={`flex items-center gap-3 cursor-pointer select-none border-t pt-4 mt-2 ${isDark ? "border-neutral-800/60" : "border-neutral-200"
+                }`}>
                 <div className="relative">
                   <input
                     type="checkbox"
@@ -935,11 +913,10 @@ export default function AnalyticsPage({
                 <button
                   type="button"
                   onClick={() => setIsEditing(false)}
-                  className={`flex-1 border text-xs font-semibold py-2.5 px-4 rounded-xl transition-colors cursor-pointer ${
-                    isDark
+                  className={`flex-1 border text-xs font-semibold py-2.5 px-4 rounded-xl transition-colors cursor-pointer ${isDark
                       ? "bg-neutral-950 hover:bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
                       : "bg-neutral-50 hover:bg-neutral-100 border-neutral-200 text-neutral-500 hover:text-neutral-900"
-                  }`}
+                    }`}
                 >
                   Cancel
                 </button>
