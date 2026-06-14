@@ -183,8 +183,8 @@ export default function LandingPage() {
 
       {/* Premium Glassmorphic Navbar with subtle accent line */}
       <header className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-all duration-500 shadow-md ${isDark
-          ? "border-violet-900/20 bg-neutral-950/70 shadow-violet-950/5"
-          : "border-violet-200/40 bg-white/70 shadow-violet-100/5"
+          ? "border-violet-900/10 bg-neutral-950/30 shadow-violet-950/5"
+          : "border-violet-200/20 bg-white/30 shadow-violet-100/5"
         }`}>
         {/* Subtle Bottom Accent Glow Line */}
         <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-violet-500/25 to-transparent" />

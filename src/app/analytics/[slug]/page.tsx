@@ -131,9 +131,9 @@ export default function AnalyticsPage({
   const [isUpdating, setIsUpdating] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
 
-  const fetchAnalytics = async (showRefreshState = false) => {
-    if (showRefreshState) setIsRefreshing(true);
-    else setIsLoading(true);
+  const fetchAnalytics = async (mode: "loading" | "syncing" | "silent" = "loading") => {
+    if (mode === "syncing") setIsRefreshing(true);
+    else if (mode === "loading") setIsLoading(true);
     setError(null);
 
     try {
@@ -150,16 +150,27 @@ export default function AnalyticsPage({
       const data = await res.json();
       setLink(data);
     } catch (err: any) {
-      setError(err.message || "An error occurred.");
+      if (mode !== "silent") {
+        setError(err.message || "An error occurred.");
+      } else {
+        console.error("Background analytics fetch error:", err);
+      }
     } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
+      if (mode === "loading") setIsLoading(false);
+      if (mode === "syncing") setIsRefreshing(false);
     }
   };
 
   useEffect(() => {
     setOrigin(window.location.origin);
-    fetchAnalytics();
+    fetchAnalytics("loading");
+
+    // Dynamic background updates every 5 seconds
+    const interval = setInterval(() => {
+      fetchAnalytics("silent");
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [slug]);
 
   const handleCopy = () => {
@@ -357,8 +368,8 @@ export default function AnalyticsPage({
           <h2 className="text-xl font-bold text-white">Analytics Unreachable</h2>
           <p className="text-neutral-400 text-sm">{error || "Something went wrong."}</p>
           <Link
-            href="/"
-            className="mt-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-200 py-2 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5"
+            href="/app"
+            className="mt-2 bg-neutral-900 hover:bg-neutral-850 border border-neutral-800 text-neutral-200 py-2 px-4 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5"
           >
             <ArrowLeft className="h-3.5 w-3.5" /> Back to Dashboard
           </Link>
@@ -378,8 +389,8 @@ export default function AnalyticsPage({
 
       {/* Premium Glassmorphic Navbar with subtle accent line */}
       <header className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-all duration-500 shadow-md ${isDark
-          ? "border-violet-900/20 bg-neutral-950/70 shadow-violet-950/5"
-          : "border-violet-200/40 bg-white/70 shadow-violet-100/5"
+          ? "border-violet-900/10 bg-neutral-950/30 shadow-violet-950/5"
+          : "border-violet-200/20 bg-white/30 shadow-violet-100/5"
         }`}>
         {/* Subtle Bottom Accent Glow Line */}
         <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-violet-500/25 to-transparent" />
@@ -387,8 +398,8 @@ export default function AnalyticsPage({
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between relative">
           <div className="flex items-center gap-4">
             <Link
-              href="/"
-              className={`border p-2 rounded-xl transition-all cursor-pointer shadow-sm ${isDark ? "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white" : "bg-neutral-50 border-neutral-250 text-neutral-500 hover:text-neutral-900"
+              href="/app"
+              className={`border p-2 rounded-xl transition-all cursor-pointer shadow-sm ${isDark ? "bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white" : "bg-neutral-50 border-neutral-250 text-neutral-550 hover:text-neutral-900"
                 }`}
             >
               <ArrowLeft className="h-4 w-4" />
@@ -426,7 +437,7 @@ export default function AnalyticsPage({
             </button>
 
             <button
-              onClick={() => fetchAnalytics(true)}
+              onClick={() => fetchAnalytics("syncing")}
               disabled={isRefreshing}
               className={`border py-2 px-4 rounded-xl text-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 select-none shadow-sm font-semibold ${isDark ? "bg-neutral-900 border-neutral-800 text-neutral-300 hover:bg-neutral-805" : "bg-neutral-50 border-neutral-250 text-neutral-700 hover:bg-neutral-100"
                 }`}
