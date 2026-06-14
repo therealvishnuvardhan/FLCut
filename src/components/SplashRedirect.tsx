@@ -10,14 +10,14 @@ interface SplashRedirectProps {
 
 export default function SplashRedirect({ slug, longUrl, linkId }: SplashRedirectProps) {
   useEffect(() => {
-    // 1. Check unique visit in sessionStorage
-    const sessionKey = `flc_route_${slug}`;
-    const hasVisited = sessionStorage.getItem(sessionKey);
+    // 1. Check unique visit in cookies
+    const cookieName = `flc_visit_${slug}`;
+    const hasVisited = document.cookie.includes(`${cookieName}=`);
     let isUnique = false;
 
     if (!hasVisited) {
       isUnique = true;
-      sessionStorage.setItem(sessionKey, "1");
+      document.cookie = `${cookieName}=1; path=/; max-age=86400; SameSite=Lax`;
     }
 
     // 2. Telemetry payload

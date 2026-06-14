@@ -10,13 +10,17 @@ interface RedirectSplashProps {
 
 export function RedirectSplash({ linkId, slug, longUrl }: RedirectSplashProps) {
   useEffect(() => {
-    const sessionKey = `flc_route_${slug}`;
-    const hasVisited = sessionStorage.getItem(sessionKey);
+    const cookieName = `flc_visit_${slug}`;
+    console.log("=== client-side uniqueness debug ===");
+    console.log("document.cookie:", document.cookie);
+    const hasVisited = document.cookie.includes(`${cookieName}=`);
+    console.log("cookieName:", cookieName, "hasVisited:", hasVisited);
     let isUnique = false;
 
     if (!hasVisited) {
       isUnique = true;
-      sessionStorage.setItem(sessionKey, "1");
+      document.cookie = `${cookieName}=1; path=/; max-age=86400; SameSite=Lax`;
+      console.log("wrote cookie, new document.cookie:", document.cookie);
     }
 
     const payload = JSON.stringify({
