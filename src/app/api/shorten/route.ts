@@ -114,12 +114,7 @@ export async function POST(req: NextRequest) {
       } catch (error: any) {
         // P2002 is Prisma's code for unique constraint violation
         if (error.code === "P2002") {
-          // Generate 3 unique suggestions
-          const suggestions = [
-            `${slug}-flc`,
-            `${slug}-2026`,
-            `${slug}-rsvp`,
-          ];
+          const suggestions = await generateUniqueSuggestions(slug);
           return NextResponse.json(
             {
               error: "This custom slug is already taken",
@@ -156,4 +151,83 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+async function generateUniqueSuggestions(baseSlug: string): Promise<string[]> {
+  const suggestions: string[] = [];
+  const suffixes = [
+    "flc",
+    "2026",
+    "rsvp",
+    "link",
+    "go",
+    "hub",
+    "url",
+    "fast",
+    "club",
+    "now",
+    "vip",
+    "direct",
+  ];
+
+  // 1. Try standard suffixes first
+  for (const suffix of suffixes) {
+    if (suggestions.length >= 3) break;
+    const candidate = `${baseSlug}-${suffix}`;
+    
+    // Check if reserved or profanity or already exists
+    if (RESERVED_SLUGS.includes(candidate.toLowerCase()) || hasProfanity(candidate)) {
+      continue;
+    }
+
+    const existing = await db.shortLink.findUnique({
+      where: { slug: candidate },
+    });
+
+    if (!existing) {
+      suggestions.push(candidate);
+    }
+  }
+
+  // 2. If we still need more suggestions, try appending random numbers
+  let attempts = 0;
+  while (suggestions.length < 3 && attempts < 50) {
+    attempts++;
+    const randomNum = Math.floor(100 + Math.random() * 900); // 3-digit random number
+    const candidate = `${baseSlug}-${randomNum}`;
+
+    if (RESERVED_SLUGS.includes(candidate.toLowerCase()) || hasProfanity(candidate)) {
+      continue;
+    }
+
+    const existing = await db.shortLink.findUnique({
+      where: { slug: candidate },
+    });
+
+    if (!existing) {
+      suggestions.push(candidate);
+    }
+  }
+
+  // 3. Absolute fallback: counter loop if nothing works
+  let counter = 1;
+  while (suggestions.length < 3) {
+    const candidate = `${baseSlug}-${counter}`;
+    
+    if (RESERVED_SLUGS.includes(candidate.toLowerCase()) || hasProfanity(candidate)) {
+      counter++;
+      continue;
+    }
+
+    const existing = await db.shortLink.findUnique({
+      where: { slug: candidate },
+    });
+
+    if (!existing) {
+      suggestions.push(candidate);
+    }
+    counter++;
+  }
+
+  return suggestions;
 }
