@@ -19,7 +19,8 @@ export function RedirectSplash({ linkId, slug, longUrl }: RedirectSplashProps) {
 
     if (!hasVisited) {
       isUnique = true;
-      document.cookie = `${cookieName}=1; path=/; max-age=86400; SameSite=Lax`;
+      const isHttps = typeof window !== "undefined" && window.location.protocol === "https:";
+      document.cookie = `${cookieName}=1; path=/; max-age=86400; SameSite=Lax${isHttps ? "; Secure" : ""}`;
       console.log("wrote cookie, new document.cookie:", document.cookie);
     }
 

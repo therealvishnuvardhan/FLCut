@@ -17,7 +17,8 @@ export default function SplashRedirect({ slug, longUrl, linkId }: SplashRedirect
 
     if (!hasVisited) {
       isUnique = true;
-      document.cookie = `${cookieName}=1; path=/; max-age=86400; SameSite=Lax`;
+      const isHttps = typeof window !== "undefined" && window.location.protocol === "https:";
+      document.cookie = `${cookieName}=1; path=/; max-age=86400; SameSite=Lax${isHttps ? "; Secure" : ""}`;
     }
 
     // 2. Telemetry payload
