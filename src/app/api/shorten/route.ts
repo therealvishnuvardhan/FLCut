@@ -174,7 +174,7 @@ async function generateUniqueSuggestions(baseSlug: string): Promise<string[]> {
   for (const suffix of suffixes) {
     if (suggestions.length >= 3) break;
     const candidate = `${baseSlug}-${suffix}`;
-    
+
     // Check if reserved or profanity or already exists
     if (RESERVED_SLUGS.includes(candidate.toLowerCase()) || hasProfanity(candidate)) {
       continue;
@@ -213,7 +213,7 @@ async function generateUniqueSuggestions(baseSlug: string): Promise<string[]> {
   let counter = 1;
   while (suggestions.length < 3) {
     const candidate = `${baseSlug}-${counter}`;
-    
+
     if (RESERVED_SLUGS.includes(candidate.toLowerCase()) || hasProfanity(candidate)) {
       counter++;
       continue;

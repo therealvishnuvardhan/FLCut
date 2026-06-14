@@ -1,998 +1,579 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useState, useEffect, useRef } from "react";
 import {
-  Link2,
-  Sparkles,
-  Copy,
-  Check,
-  Trash2,
-  ExternalLink,
+  Sun,
+  Moon,
+  ArrowRight,
+  BarChart3,
   Calendar,
-  Clock,
-  HelpCircle,
+  Zap,
   Sliders,
-  AlertCircle,
-  ChevronDown,
-  ChevronUp,
-  BarChart2,
-  RefreshCw,
-  Pencil,
+  ShieldCheck,
+  LayoutDashboard,
+  LogIn,
+  Scissors,
 } from "lucide-react";
+import { useTheme } from "../components/ThemeProvider";
+import { Footer } from "../components/Footer";
 
-interface ShortLink {
-  id: number;
-  slug: string;
-  longUrl: string;
-  validFrom: string | null;
-  validUntil: string | null;
-  maxClicks: number | null;
-  fallbackUrl: string | null;
-  bypassAuth: boolean;
-  createdAt: string;
-  analyticsEvents?: Array<{
-    id: number;
-    isUnique: boolean;
-    userAgent: string | null;
-    country: string | null;
-    city: string | null;
-    clickedAt: string;
-  }>;
-}
-
-function parseUserAgent(ua: string | null) {
-  if (!ua) return { browser: "Unknown", os: "Unknown" };
-  let browser = "Other";
-  let os = "Other";
-
-  // Browser check
-  if (ua.includes("Firefox")) browser = "Firefox";
-  else if (ua.includes("Chrome") && !ua.includes("Chromium") && !ua.includes("Edg") && !ua.includes("OPR")) browser = "Chrome";
-  else if (ua.includes("Safari") && !ua.includes("Chrome")) browser = "Safari";
-  else if (ua.includes("Edg")) browser = "Edge";
-  else if (ua.includes("OPR") || ua.includes("Opera")) browser = "Opera";
-  else if (ua.includes("MSIE") || ua.includes("Trident")) browser = "IE";
-
-  // OS check
-  if (ua.includes("Windows")) os = "Windows";
-  else if (ua.includes("Macintosh") || ua.includes("Mac OS")) os = "macOS";
-  else if (ua.includes("Android")) os = "Android";
-  else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
-  else if (ua.includes("Linux")) os = "Linux";
-
-  return { browser, os };
-}
-
-function getBreakdowns(events: Array<{ userAgent: string | null; country: string | null; city: string | null }> = []) {
-  const browsers: { [key: string]: number } = {};
-  const osList: { [key: string]: number } = {};
-  const countries: { [key: string]: number } = {};
-  const cities: { [key: string]: number } = {};
-
-  events.forEach((e) => {
-    const { browser, os } = parseUserAgent(e.userAgent);
-    browsers[browser] = (browsers[browser] || 0) + 1;
-    osList[os] = (osList[os] || 0) + 1;
-
-    const ctry = e.country || "Unknown";
-    countries[ctry] = (countries[ctry] || 0) + 1;
-
-    const cty = e.city || "Unknown";
-    cities[cty] = (cities[cty] || 0) + 1;
-  });
-
-  const sortDesc = (obj: { [key: string]: number }) =>
-    Object.entries(obj)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
-
-  return {
-    browsers: sortDesc(browsers),
-    osList: sortDesc(osList),
-    countries: sortDesc(countries),
-    cities: sortDesc(cities),
-  };
-}
-
-export default function Home() {
+export default function LandingPage() {
   const { data: session, status } = useSession();
-  const user = session?.user;
   const isLoggedIn = status === "authenticated";
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
 
-  const [longUrl, setLongUrl] = useState("");
-  const [customSlug, setCustomSlug] = useState("");
-  
-  // Advanced settings toggle & state
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [validFrom, setValidFrom] = useState("");
-  const [validUntil, setValidUntil] = useState("");
-  const [maxClicks, setMaxClicks] = useState("");
-  const [requireAuth, setRequireAuth] = useState(false);
+  // References for dynamic chain alignment
+  const logoRef = useRef<HTMLDivElement>(null);
+  const scissorsRef = useRef<HTMLDivElement>(null);
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [successLink, setSuccessLink] = useState<ShortLink | null>(null);
-  
-  // Local links dashboard
-  const [localSlugs, setLocalSlugs] = useState<string[]>([]);
-  const [myLinks, setMyLinks] = useState<ShortLink[]>([]);
-  const [isFetchingLinks, setIsFetchingLinks] = useState(false);
-  const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [origin, setOrigin] = useState("");
+  const [logoPos, setLogoPos] = useState({ x: 0, y: 0 });
+  const [scissorsPos, setScissorsPos] = useState({ x: 0, y: 0 });
 
-  // Editing state
-  const [editingLink, setEditingLink] = useState<ShortLink | null>(null);
-  const [editLongUrl, setEditLongUrl] = useState("");
-  const [editMaxClicks, setEditMaxClicks] = useState("");
-  const [editValidFrom, setEditValidFrom] = useState("");
-  const [editValidUntil, setEditValidUntil] = useState("");
-  const [editRequireAuth, setEditRequireAuth] = useState(false);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [editError, setEditError] = useState<string | null>(null);
-
-  // Set origin and check URL parameters on mount
   useEffect(() => {
-    setOrigin(window.location.origin);
-    // Load local slugs
-    const storedSlugs = localStorage.getItem("flcut_local_slugs");
-    if (storedSlugs) {
-      try {
-        const parsed = JSON.parse(storedSlugs);
-        if (Array.isArray(parsed)) {
-          setLocalSlugs(parsed);
-        }
-      } catch {
-        // Fallback for comma-separated legacy formats
-        setLocalSlugs(storedSlugs.split(",").filter(Boolean));
-      }
-    }
+    const handleUpdate = () => {
+      if (!logoRef.current || !scissorsRef.current) return;
+      const logoRect = logoRef.current.getBoundingClientRect();
+      const scissorsRect = scissorsRef.current.getBoundingClientRect();
+      
+      setLogoPos({
+        x: logoRect.right + 10 + window.scrollX,
+        y: logoRect.top + logoRect.height / 2 + window.scrollY,
+      });
+      
+      setScissorsPos({
+        x: scissorsRect.left + scissorsRect.width * 0.5 + window.scrollX,
+        y: scissorsRect.top + scissorsRect.height * 0.45 + window.scrollY,
+      });
+    };
 
-    // Check URL parameters for redirect errors
-    const params = new URLSearchParams(window.location.search);
-    const err = params.get("error");
-    const slg = params.get("slug");
-    if (err) {
-      if (err === "link_not_active") {
-        setError(`The link /${slg} is not active yet.`);
-      } else if (err === "link_expired") {
-        setError(`The link /${slg} has expired.`);
-      } else if (err === "link_limit_reached") {
-        setError(`The link /${slg} has reached its click limit.`);
-      }
-      // Clean up search parameters from the address bar
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
+    handleUpdate();
+    
+    // Set layout settling fallbacks
+    const t1 = setTimeout(handleUpdate, 100);
+    const t2 = setTimeout(handleUpdate, 500);
+
+    window.addEventListener("resize", handleUpdate);
+    window.addEventListener("scroll", handleUpdate);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener("resize", handleUpdate);
+      window.removeEventListener("scroll", handleUpdate);
+    };
   }, []);
 
-  // Fetch links details (either for logged-in user or anonymous slugs)
-  useEffect(() => {
-    if (!isLoggedIn && localSlugs.length === 0) {
-      setMyLinks([]);
-      return;
-    }
-
-    const fetchLinks = async () => {
-      setIsFetchingLinks(true);
-      try {
-        const query = isLoggedIn ? "" : `?slugs=${localSlugs.join(",")}`;
-        const res = await fetch(`/api/links${query}`, {
-          headers: {
-            "Cache-Control": "no-store",
-          },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setMyLinks(data);
-        }
-      } catch (err) {
-        console.error("Failed to fetch links:", err);
-      } finally {
-        setIsFetchingLinks(false);
-      }
-    };
-
-    fetchLinks();
-  }, [localSlugs, isLoggedIn, refreshTrigger]);
-
-  const startEditing = (link: ShortLink) => {
-    setEditingLink(link);
-    setEditLongUrl(link.longUrl);
-    setEditMaxClicks(link.maxClicks !== null ? String(link.maxClicks) : "");
-    
-    // Format dates to datetime-local format (YYYY-MM-DDTHH:MM)
-    const formatDate = (dateStr: string | null) => {
-      if (!dateStr) return "";
-      const d = new Date(dateStr);
-      const tzOffset = d.getTimezoneOffset() * 60000;
-      return (new Date(d.getTime() - tzOffset)).toISOString().slice(0, 16);
-    };
-    
-    setEditValidFrom(formatDate(link.validFrom));
-    setEditValidUntil(formatDate(link.validUntil));
-    setEditRequireAuth(!link.bypassAuth);
-    setEditError(null);
-  };
-
-  const handleUpdate = async (e: React.FormEvent) => {
+  const scrollToAbout = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    if (!editingLink) return;
-
-    setIsUpdating(true);
-    setEditError(null);
-
-    try {
-      const payload: any = {
-        slug: editingLink.slug,
-        longUrl: editLongUrl.trim(),
-        bypassAuth: !editRequireAuth,
-      };
-
-      payload.validFrom = editValidFrom ? new Date(editValidFrom).toISOString() : null;
-      payload.validUntil = editValidUntil ? new Date(editValidUntil).toISOString() : null;
-      payload.maxClicks = editMaxClicks !== undefined && editMaxClicks !== "" ? parseInt(editMaxClicks, 10) : null;
-
-      const res = await fetch("/api/links", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setEditError(data.error || "Failed to update link configurations.");
-        return;
-      }
-
-      // Update link list locally
-      setMyLinks((prev) =>
-        prev.map((link) => (link.slug === editingLink.slug ? data : link))
-      );
-
-      // Close modal
-      setEditingLink(null);
-    } catch (err) {
-      console.error(err);
-      setEditError("Failed to connect to server. Please try again.");
-    } finally {
-      setIsUpdating(false);
+    const element = document.getElementById("about");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
     }
   };
 
-  const handleShorten = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-    setSuggestions([]);
-    setSuccessLink(null);
-
-    try {
-      const payload: any = {
-        longUrl,
-        bypassAuth: !requireAuth,
-      };
-
-      if (customSlug.trim()) {
-        payload.customSlug = customSlug.trim();
-      }
-
-      if (validFrom) payload.validFrom = new Date(validFrom).toISOString();
-      if (validUntil) payload.validUntil = new Date(validUntil).toISOString();
-      if (maxClicks) payload.maxClicks = parseInt(maxClicks, 10);
-
-      const res = await fetch("/api/shorten", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        if (res.status === 409) {
-          setError(data.error || "Slug already taken.");
-          setSuggestions(data.suggestions || []);
-        } else {
-          setError(data.error || "Something went wrong.");
-        }
-        return;
-      }
-
-      // Success
-      setSuccessLink(data);
-      setLongUrl("");
-      setCustomSlug("");
-      setValidFrom("");
-      setValidUntil("");
-      setMaxClicks("");
-      setRequireAuth(false);
-      setShowAdvanced(false);
-
-      // Save to local list if anonymous
-      if (!isLoggedIn) {
-        const updatedSlugs = [data.slug, ...localSlugs.filter((s) => s !== data.slug)];
-        localStorage.setItem("flcut_local_slugs", JSON.stringify(updatedSlugs));
-        setLocalSlugs(updatedSlugs);
-      } else {
-        // If logged in, reload link list from database directly
-        setMyLinks((prev) => [data, ...prev]);
-      }
-    } catch (err) {
-      setError("Failed to connect to server. Please try again.");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCopy = (slug: string) => {
-    navigator.clipboard.writeText(`${origin}/${slug}`);
-    setCopiedSlug(slug);
-    setTimeout(() => {
-      setCopiedSlug(null);
-    }, 2000);
-  };
-
-  const handleDelete = async (slug: string) => {
-    if (isLoggedIn) {
-      try {
-        const res = await fetch(`/api/links?slug=${slug}`, {
-          method: "DELETE",
-        });
-        if (res.ok) {
-          setMyLinks(myLinks.filter((link) => link.slug !== slug));
-        } else {
-          const data = await res.json();
-          alert(data.error || "Failed to delete link.");
-        }
-      } catch (err) {
-        console.error("Delete failed:", err);
-      }
-    } else {
-      const updatedSlugs = localSlugs.filter((s) => s !== slug);
-      localStorage.setItem("flcut_local_slugs", JSON.stringify(updatedSlugs));
-      setLocalSlugs(updatedSlugs);
-    }
-  };
-
-  const isLinkActive = (link: ShortLink) => {
-    const now = new Date();
-    if (link.validFrom && now < new Date(link.validFrom)) return false;
-    if (link.validUntil && now > new Date(link.validUntil)) return false;
-    
-    // Check click limit expiration
-    const totalClicks = link.analyticsEvents?.length || 0;
-    if (link.maxClicks !== null && totalClicks >= link.maxClicks) return false;
-    
-    return true;
+  // Social and Navigation links for Footer
+  const footerData = {
+    brandName: "FLCut",
+    socialLinks: [
+      {
+        icon: (
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+            <path d="M9 18c-4.51 2-5-2-7-2" />
+          </svg>
+        ),
+        href: "https://github.com",
+        label: "GitHub"
+      },
+      {
+        icon: (
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
+          </svg>
+        ),
+        href: "https://twitter.com",
+        label: "Twitter"
+      },
+      {
+        icon: (
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+            <rect x="2" y="9" width="4" height="12" />
+            <circle cx="4" cy="4" r="2" />
+          </svg>
+        ),
+        href: "https://linkedin.com",
+        label: "LinkedIn"
+      },
+    ],
+    mainLinks: [
+      { href: "#about", label: "About" },
+      { href: "/app", label: "Dashboard" },
+    ],
+    legalLinks: [
+      { href: "#", label: "Privacy Policy" },
+      { href: "#", label: "Terms of Service" },
+    ],
+    copyright: {
+      text: "© 2026 FLCut. All rights reserved.",
+      license: "MIT License",
+    },
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col font-sans relative overflow-hidden">
-      {/* Background Decorative Gradients */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-violet-900/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-cyan-900/10 blur-[120px] pointer-events-none" />
+    <div className="min-h-screen relative flex flex-col bg-transparent">
+      
+      {/* Absolute overlay chain drawing between logo and scissors */}
+      {logoPos.x > 0 && scissorsPos.x > 0 && (
+        <div className="absolute inset-0 w-full h-[650px] pointer-events-none -z-10 hidden lg:block overflow-hidden">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="chain-neon-glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="8" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
 
-      {/* Header */}
-      <header className="border-b border-neutral-800 bg-neutral-950/70 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-violet-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-violet-500/20">
-              <span className="font-black text-black text-lg">FL</span>
-            </div>
-            <div>
-              <h1 className="font-bold text-lg leading-tight tracking-tight text-white">
-                FLCut
-              </h1>
-              <p className="text-[10px] text-neutral-400 font-mono tracking-wider">
-                FINITE LOOP CLUB
-              </p>
-            </div>
-          </div>
+            {/* Ambient Cyan Under-Glow for premium neon gradient feel */}
+            <line 
+              x1={logoPos.x} 
+              y1={logoPos.y} 
+              x2={scissorsPos.x} 
+              y2={scissorsPos.y} 
+              stroke={isDark ? "#06b6d4" : "#0891b2"} 
+              strokeWidth="11" 
+              strokeLinecap="round"
+              filter="url(#chain-neon-glow)"
+              className="opacity-30"
+            />
+            {/* Glowing neon chain blur (Pink) */}
+            <line 
+              x1={logoPos.x} 
+              y1={logoPos.y} 
+              x2={scissorsPos.x} 
+              y2={scissorsPos.y} 
+              stroke={isDark ? "#db2777" : "#ec4899"} 
+              strokeWidth="8" 
+              strokeDasharray="14 24" 
+              strokeLinecap="round"
+              filter="url(#chain-neon-glow)"
+              className="opacity-50"
+            />
+            {/* Foreground crisp chain */}
+            <line 
+              x1={logoPos.x} 
+              y1={logoPos.y} 
+              x2={scissorsPos.x} 
+              y2={scissorsPos.y} 
+              stroke={isDark ? "#ec4899" : "#db2777"} 
+              strokeWidth="5" 
+              strokeDasharray="14 24" 
+              strokeLinecap="round"
+              className="opacity-95"
+            />
+          </svg>
+        </div>
+      )}
+
+      {/* Premium Glassmorphic Navbar with subtle accent line */}
+      <header className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-all duration-500 shadow-md ${
+        isDark 
+          ? "border-violet-900/20 bg-neutral-950/70 shadow-violet-950/5" 
+          : "border-violet-200/40 bg-white/70 shadow-violet-100/5"
+      }`}>
+        {/* Subtle Bottom Accent Glow Line */}
+        <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-violet-500/25 to-transparent" />
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between relative">
           
+          {/* Logo Brand */}
+          <div ref={logoRef} className="flex items-center gap-3 group relative z-10 select-none">
+            <Link href="/app" className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-violet-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-violet-500/20 transition-transform group-hover:scale-105">
+                <span className="font-black text-black text-lg">FL</span>
+              </div>
+              <div>
+                <span className="font-bold text-lg leading-tight tracking-tight block">
+                  FLCut
+                </span>
+              </div>
+            </Link>
+          </div>
+
+          {/* Nav Controls */}
           <div className="flex items-center gap-4">
-            {isLoggedIn && user ? (
-              <div className="flex items-center gap-3">
-                {user.image ? (
-                  <img
-                    src={user.image}
-                    alt={user.name || "User"}
-                    className="h-8 w-8 rounded-full border border-neutral-700"
-                  />
-                ) : (
-                  <div className="h-8 w-8 rounded-full bg-violet-600 flex items-center justify-center text-xs font-bold text-white uppercase border border-neutral-700">
-                    {user.name ? user.name.charAt(0) : user.email?.charAt(0)}
-                  </div>
-                )}
-                <div className="hidden sm:flex flex-col text-left">
-                  <span className="text-xs font-semibold text-white leading-none">
-                    {user.name || "Creator"}
-                  </span>
-                  <span className="text-[10px] text-neutral-500 font-mono leading-none mt-0.5">
-                    {user.email}
-                  </span>
-                </div>
-                <button
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                  className="bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-neutral-300 font-semibold py-1.5 px-3 rounded-lg text-xs transition-colors cursor-pointer"
-                >
-                  Sign Out
-                </button>
-              </div>
+            
+            {/* About Navigation Link */}
+            <button
+              onClick={scrollToAbout}
+              className={`text-sm font-semibold transition-colors cursor-pointer ${
+                isDark ? "text-neutral-300 hover:text-white" : "text-neutral-600 hover:text-black"
+              }`}
+            >
+              About
+            </button>
+
+            {/* Theme Toggle Button */}
+            <button
+              onClick={toggleTheme}
+              aria-label="Toggle Theme"
+              className={`p-2 rounded-xl border transition-all cursor-pointer ${
+                isDark 
+                  ? "bg-neutral-900 border-neutral-800 text-yellow-400 hover:bg-neutral-800" 
+                  : "bg-white border-neutral-200 text-violet-600 hover:bg-neutral-50 shadow-sm"
+              }`}
+            >
+              {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+
+            {/* Auth Action Button */}
+            {status === "loading" ? (
+              <div className={`h-8 w-20 rounded-xl animate-pulse ${isDark ? "bg-neutral-800" : "bg-neutral-200"}`} />
+            ) : isLoggedIn ? (
+              <Link
+                href="/app"
+                className="bg-violet-600 hover:bg-violet-500 text-white font-semibold py-2 px-4 rounded-xl text-xs sm:text-sm transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-1.5 shadow-lg shadow-violet-600/20 cursor-pointer"
+              >
+                <LayoutDashboard className="h-3.5 w-3.5" />
+                Go to App
+              </Link>
             ) : (
-              <div className="flex items-center gap-3">
-                <a
-                  href="/auth/login"
-                  className="bg-white hover:bg-neutral-200 text-black font-semibold py-1.5 px-3 rounded-lg text-xs transition-colors shadow select-none cursor-pointer"
-                >
-                  Sign In
-                </a>
-              </div>
+              <Link
+                href="/auth/login?callbackUrl=/app"
+                className="bg-violet-600 hover:bg-violet-500 text-white font-semibold py-2 px-4 rounded-xl text-xs sm:text-sm transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-1.5 shadow-lg shadow-violet-600/20 cursor-pointer"
+              >
+                <LogIn className="h-3.5 w-3.5" />
+                Sign In
+              </Link>
             )}
-            <span className="hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-neutral-900 border border-neutral-800 text-neutral-400 font-mono">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              v1.0 {isLoggedIn ? "Account" : "Local"}
-            </span>
+
           </div>
         </div>
       </header>
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12 flex flex-col gap-12 z-10">
-        {/* Hero Area */}
-        <div className="text-center flex flex-col gap-4">
-          <h2 className="text-4xl sm:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-neutral-50 via-white to-neutral-400">
-            Shorten Links with Precision.
-          </h2>
-          <p className="text-neutral-400 text-base max-w-xl mx-auto leading-relaxed">
-            Create fast, clean, and customizable short links instantly. Monitor your creations right in your {isLoggedIn ? "creator account" : "browser"} dashboard.
-          </p>
-        </div>
-
-        {/* Shortener Core Card */}
-        <div className="bg-neutral-900/50 border border-neutral-800/80 rounded-3xl p-6 md:p-8 backdrop-blur-xl shadow-2xl relative">
-          <form onSubmit={handleShorten} className="flex flex-col gap-6">
-            {/* Long URL Input */}
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-neutral-300 flex items-center gap-2">
-                <Link2 className="h-4 w-4 text-violet-400" />
-                Destination URL
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="https://example.com/very-long-link-to-shorten"
-                  value={longUrl}
-                  onChange={(e) => setLongUrl(e.target.value)}
-                  className="w-full bg-neutral-950/80 border border-neutral-800 rounded-xl py-3 px-4 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all text-sm pr-12"
-                  required
-                />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500">
-                  <Link2 className="h-5 w-5" />
-                </div>
-              </div>
-            </div>
-
-            {/* Custom Slug Input */}
-            <div className="flex flex-col gap-2">
-              <div className="flex justify-between items-center">
-                <label className="text-sm font-semibold text-neutral-300 flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-cyan-400" />
-                  Custom Slug <span className="text-neutral-500 font-normal text-xs">(optional)</span>
-                </label>
-              </div>
-              <div className="flex rounded-xl overflow-hidden border border-neutral-800 focus-within:ring-2 focus-within:ring-violet-500/50 focus-within:border-violet-500 transition-all bg-neutral-950/80">
-                <span className="bg-neutral-900 px-4 flex items-center text-xs font-mono text-neutral-500 border-r border-neutral-800 select-none">
-                  {origin ? origin.replace(/^https?:\/\//i, "") : "flcut.club"}/
-                </span>
-                <input
-                  type="text"
-                  placeholder="custom-slug"
-                  value={customSlug}
-                  onChange={(e) => setCustomSlug(e.target.value)}
-                  className="w-full bg-transparent py-3 px-4 text-neutral-100 placeholder-neutral-600 focus:outline-none text-sm font-mono"
-                />
-              </div>
-            </div>
-
-            {/* Advanced Settings Toggle */}
-            <div className="border-t border-neutral-800 pt-4">
-              <button
-                type="button"
-                onClick={() => setShowAdvanced(!showAdvanced)}
-                className="flex items-center gap-2 text-xs font-semibold text-neutral-400 hover:text-white transition-colors cursor-pointer"
-              >
-                <Sliders className="h-3.5 w-3.5" />
-                Advanced Controls (Validity & Expiration)
-                {showAdvanced ? (
-                  <ChevronUp className="h-4 w-4" />
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
-                )}
-              </button>
-
-              {showAdvanced && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 animate-fadeIn">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-neutral-400 flex items-center gap-1.5">
-                      <Calendar className="h-3 w-3" /> Valid From
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={validFrom}
-                      onChange={(e) => setValidFrom(e.target.value)}
-                      onClick={(e) => {
-                        try {
-                          e.currentTarget.showPicker();
-                        } catch (err) {}
-                      }}
-                      className="bg-neutral-950/80 border border-neutral-800 rounded-lg p-2 text-xs text-neutral-300 focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer w-full text-left"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-neutral-400 flex items-center gap-1.5">
-                      <Calendar className="h-3 w-3" /> Valid Until
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={validUntil}
-                      onChange={(e) => setValidUntil(e.target.value)}
-                      onClick={(e) => {
-                        try {
-                          e.currentTarget.showPicker();
-                        } catch (err) {}
-                      }}
-                      className="bg-neutral-950/80 border border-neutral-800 rounded-lg p-2 text-xs text-neutral-300 focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer w-full text-left"
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-neutral-400 flex items-center gap-1.5">
-                      <Clock className="h-3 w-3" /> Max Clicks
-                    </label>
-                    <input
-                      type="number"
-                      placeholder="e.g. 100"
-                      value={maxClicks}
-                      onChange={(e) => setMaxClicks(e.target.value)}
-                      className="bg-neutral-950/80 border border-neutral-800 rounded-lg p-2 text-xs text-neutral-300 placeholder-neutral-600 focus:outline-none focus:ring-1 focus:ring-violet-500"
-                    />
-                  </div>
-
-                  {/* Visitor authentication toggle */}
-                  <div className="flex flex-col gap-1.5 md:col-span-2 border-t border-neutral-800/60 pt-4 mt-2">
-                    <label className="flex items-center gap-3 cursor-pointer select-none">
-                      <div className="relative">
-                        <input
-                          type="checkbox"
-                          checked={requireAuth}
-                          onChange={(e) => setRequireAuth(e.target.checked)}
-                          className="sr-only"
-                        />
-                        <div className={`w-10 h-5 rounded-full transition-colors ${requireAuth ? 'bg-violet-600' : 'bg-neutral-800'}`}></div>
-                        <div className={`absolute top-0.5 left-0.5 bg-white w-4 h-4 rounded-full transition-transform ${requireAuth ? 'translate-x-5' : 'translate-x-0'}`}></div>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs font-semibold text-neutral-300">Require FLCut Login</span>
-                        <span className="text-[10px] text-neutral-500">
-                          Force visitors to sign in on FLCut first (ideal if the destination site has no built-in auth).
-                        </span>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Error Message & Suggestions */}
-            {error && (
-              <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl flex flex-col gap-3">
-                <div className="flex items-center gap-2 text-sm font-semibold">
-                  <AlertCircle className="h-4 w-4" />
-                  {error}
-                </div>
-                {suggestions.length > 0 && (
-                  <div className="flex flex-col gap-2">
-                    <span className="text-xs text-neutral-400">Available Suggestions (click to choose):</span>
-                    <div className="flex flex-wrap gap-2">
-                      {suggestions.map((sug) => (
-                        <button
-                          key={sug}
-                          type="button"
-                          onClick={() => {
-                            setCustomSlug(sug);
-                            setError(null);
-                            setSuggestions([]);
-                          }}
-                          className="bg-neutral-950 hover:bg-neutral-800 border border-neutral-800 text-xs font-mono py-1 px-3 rounded-lg text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer"
-                        >
-                          {sug}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-bold py-3.5 px-6 rounded-xl text-sm transition-all hover:opacity-95 disabled:opacity-50 hover:shadow-lg hover:shadow-violet-500/20 active:scale-[0.99] flex items-center justify-center gap-2 select-none cursor-pointer"
-            >
-              {isLoading ? (
-                <>
-                  <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Shortening...
-                </>
-              ) : (
-                "Shorten Link"
-              )}
-            </button>
-          </form>
-
-          {/* Success Banner */}
-          {successLink && (
-            <div className="mt-6 bg-gradient-to-tr from-violet-950/30 to-cyan-950/30 border border-violet-500/20 p-5 rounded-2xl animate-scaleIn flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-violet-400 font-bold tracking-wider font-mono uppercase">
-                  Successfully Shortened!
-                </span>
-                <a
-                  href={`${origin}/${successLink.slug}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-lg font-bold text-white hover:text-cyan-400 flex items-center gap-1.5 transition-colors font-mono"
-                >
-                  {origin ? origin.replace(/^https?:\/\//i, "") : "flcut.club"}/{successLink.slug}
-                  <ExternalLink className="h-4 w-4 opacity-65" />
-                </a>
-                <span className="text-xs text-neutral-500 max-w-md truncate">
-                  Original: {successLink.longUrl}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => handleCopy(successLink.slug)}
-                className="w-full sm:w-auto bg-white hover:bg-neutral-200 text-black font-semibold py-2 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-md hover:scale-105 active:scale-95 cursor-pointer"
-              >
-                {copiedSlug === successLink.slug ? (
-                  <>
-                    <Check className="h-3.5 w-3.5 text-emerald-600" />
-                    Copied!
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-3.5 w-3.5" />
-                    Copy Link
-                  </>
-                )}
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Local Dashboard */}
-        <div className="flex flex-col gap-6">
-          <div className="flex justify-between items-center border-b border-neutral-900 pb-4">
-            <h3 className="text-xl font-bold text-white flex items-center gap-2.5">
-              {isLoggedIn ? "Account Dashboard" : "My Links"}
-              <span className="bg-neutral-900 border border-neutral-800 text-xs text-neutral-400 px-2 py-0.5 rounded-full font-mono font-normal">
-                {myLinks.length}
-              </span>
-            </h3>
+      {/* Hero Section Container */}
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-28 pb-16 sm:pt-36 sm:pb-24 flex flex-col justify-center relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+          
+          {/* Left Text Block */}
+          <div className="lg:col-span-7 flex flex-col justify-center text-left gap-6 lg:pr-4">
             
-            <button
-              onClick={() => setRefreshTrigger((prev) => prev + 1)}
-              disabled={isFetchingLinks}
-              className="bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-neutral-400 hover:text-white p-2 rounded-xl transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 text-xs font-semibold select-none"
-              title="Refresh Dashboard"
-            >
-              <RefreshCw className={`h-3.5 w-3.5 ${isFetchingLinks ? "animate-spin text-cyan-400" : ""}`} />
-              <span className="hidden sm:inline">Refresh</span>
-            </button>
+            {/* Main Brand Title */}
+            <div>
+              <h1 className="story-script-regular text-8xl sm:text-9xl tracking-normal text-transparent bg-clip-text bg-gradient-to-r from-violet-500 via-purple-500 to-cyan-500 drop-shadow-[0_2px_15px_rgba(139,92,246,0.15)] leading-[0.85] select-none pb-4">
+                flcut
+              </h1>
+              <h2 className="font-extrabold text-4xl sm:text-5xl lg:text-6xl mt-4 tracking-tight leading-none">
+                Link Redirection, <span className="story-script-regular text-violet-500 dark:text-violet-400 text-5xl sm:text-6xl md:text-7xl block sm:inline-block ml-1 font-normal tracking-wide drop-shadow-[0_2px_8px_rgba(139,92,246,0.2)]">Redefined</span>
+              </h2>
+            </div>
+
+            {/* Subheading/Details */}
+            <p className={`text-base sm:text-lg max-w-xl leading-relaxed transition-colors duration-500 ${
+              isDark ? "text-neutral-400" : "text-neutral-600"
+            }`}>
+              Create clean, branded links with instant telemetry. Take command of your redirects with scheduler validation gates, absolute click cap caps, and robust Google authorization filters.
+            </p>
+
+            {/* Primary Action Call-to-action */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mt-2">
+              <Link
+                href="/app"
+                className="bg-gradient-to-r from-violet-600 to-cyan-500 hover:from-violet-500 hover:to-cyan-400 text-white font-bold py-4 px-10 rounded-2xl text-base transition-all hover:scale-[1.03] active:scale-[0.97] flex items-center justify-center gap-2 shadow-lg shadow-violet-500/20 cursor-pointer select-none"
+              >
+                Continue without Sign-In
+                <ArrowRight className="h-5 w-5" />
+              </Link>
+            </div>
+
           </div>
 
-          {isFetchingLinks ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[1, 2].map((i) => (
-                <div
-                  key={i}
-                  className="bg-neutral-900/30 border border-neutral-800/50 rounded-2xl p-5 flex flex-col gap-4 animate-pulse"
-                >
-                  <div className="h-5 bg-neutral-800 rounded w-1/2" />
-                  <div className="h-4 bg-neutral-800 rounded w-3/4" />
-                  <div className="h-10 bg-neutral-800 rounded-xl" />
-                </div>
-              ))}
+          {/* Right Visual Block */}
+          <div ref={scissorsRef} className="lg:col-span-5 flex justify-center items-center relative">
+            
+            {/* Dynamic visual aura */}
+            <div className={`absolute h-80 w-80 rounded-full blur-3xl pointer-events-none -z-10 transition-all duration-700 ${
+              isDark ? "bg-violet-600/10" : "bg-violet-200/30"
+            }`} />
+            
+            {/* Integrated Vector chain-cutting-scissors graphic */}
+            <div className="relative select-none p-4">
+              <svg 
+                className="w-72 h-72 sm:w-96 sm:h-96 relative drop-shadow-[0_15px_40px_rgba(139,92,246,0.25)] animate-float" 
+                viewBox="0 0 200 200" 
+                fill="none" 
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                {/* Embedded gradients and filters for glowing chrome/neon design */}
+                <defs>
+                  <linearGradient id="metal-chrome" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#f8fafc" />
+                    <stop offset="35%" stopColor="#cbd5e1" />
+                    <stop offset="60%" stopColor="#64748b" />
+                    <stop offset="85%" stopColor="#94a3b8" />
+                    <stop offset="100%" stopColor="#334155" />
+                  </linearGradient>
+                  
+                  <filter id="scissors-shadow" x="-30%" y="-30%" width="160%" height="160%">
+                    <feDropShadow dx="0" dy="0" stdDeviation="7" floodColor={isDark ? "#a855f7" : "#6366f1"} floodOpacity="0.4" />
+                    <feDropShadow dx="3" dy="9" stdDeviation="5" floodColor="#000000" floodOpacity="0.35" />
+                  </filter>
+                  
+                  <filter id="cut-glow" x="-50%" y="-50%" width="200%" height="200%">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feMerge>
+                      <feMergeNode in="blur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+                </defs>
+
+                {/* CSS rotation keyframes embedded directly in the SVG */}
+                <style>{`
+                  @keyframes cut-left {
+                    0%, 100% { transform: rotate(0deg); }
+                    50% { transform: rotate(-10deg); }
+                  }
+                  @keyframes cut-right {
+                    0%, 100% { transform: rotate(0deg); }
+                    50% { transform: rotate(10deg); }
+                  }
+                `}</style>
+
+
+                {/* Right Chain segment falling away */}
+                <path 
+                  d="M 112 98 L 190 150" 
+                  stroke={isDark ? "#db2777" : "#ec4899"} 
+                  strokeWidth="8.5" 
+                  strokeLinecap="round" 
+                  strokeDasharray="14 18" 
+                  className="opacity-80" 
+                  filter="url(#cut-glow)"
+                />
+                
+                {/* Spark particles at cut point */}
+                <circle cx="102" cy="92" r="3.5" fill="#fbbf24" filter="url(#cut-glow)" />
+                <path d="M 102 92 L 93 80 M 102 92 L 115 82 M 102 92 L 105 105 M 102 92 L 89 97" stroke="#fbbf24" strokeWidth="2.5" strokeLinecap="round" className="opacity-90" />
+
+                {/* Scissors Graphic Parts with metallic gradient & premium shadows */}
+                <g className="origin-[100px_90px]" style={{ animation: "cut-left 3.5s ease-in-out infinite" }} filter="url(#scissors-shadow)">
+                  {/* Handle Loop */}
+                  <circle cx="145" cy="45" r="16.5" stroke="url(#metal-chrome)" strokeWidth="6" fill="none" />
+                  {/* Blade element */}
+                  <path d="M 132 56 L 100 90 L 60 130" stroke="url(#metal-chrome)" strokeWidth="7" strokeLinecap="round" />
+                  {/* Shiny cutting edge highlight */}
+                  <path d="M 100 90 L 60 130" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" />
+                </g>
+
+                <g className="origin-[100px_90px]" style={{ animation: "cut-right 3.5s ease-in-out infinite" }} filter="url(#scissors-shadow)">
+                  {/* Handle Loop */}
+                  <circle cx="145" cy="135" r="16.5" stroke="url(#metal-chrome)" strokeWidth="6" fill="none" />
+                  {/* Blade element */}
+                  <path d="M 132 124 L 100 90 L 60 50" stroke="url(#metal-chrome)" strokeWidth="7" strokeLinecap="round" />
+                  {/* Shiny cutting edge highlight */}
+                  <path d="M 100 90 L 60 50" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" />
+                </g>
+
+                {/* Screw center pivot pin */}
+                <circle cx="100" cy="90" r="5" fill={isDark ? "#334155" : "#1e293b"} stroke="#f8fafc" strokeWidth="2" />
+              </svg>
             </div>
-          ) : myLinks.length === 0 ? (
-            <div className="text-center py-16 bg-neutral-900/10 border border-neutral-900 rounded-3xl flex flex-col items-center gap-3">
-              <div className="h-12 w-12 rounded-full bg-neutral-900 flex items-center justify-center text-neutral-500">
-                <Link2 className="h-6 w-6" />
-              </div>
-              <h4 className="font-semibold text-neutral-300">No links shortened yet</h4>
-              <p className="text-xs text-neutral-500 max-w-xs leading-normal">
-                {isLoggedIn 
-                  ? "You haven't created any links under this account yet. Shorten a URL above to start!"
-                  : "Your shortened links will appear here on this browser. Put a URL above to get started!"
-                }
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {myLinks.map((link) => {
-                const active = isLinkActive(link);
-                const totalClicks = link.analyticsEvents?.length || 0;
-                const uniqueClicks = link.analyticsEvents?.filter((e) => e.isUnique).length || 0;
+            
+          </div>
 
-                return (
-                  <div
-                    key={link.id}
-                    className="bg-neutral-900/35 border border-neutral-800/80 rounded-2xl p-5 hover:border-neutral-700/80 transition-all flex flex-col justify-between gap-4 group relative overflow-hidden"
-                  >
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="font-mono text-sm font-bold text-white max-w-[50%] truncate">
-                          /{link.slug}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          {!link.bypassAuth && (
-                            <span className="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider font-mono bg-violet-500/10 border border-violet-500/20 text-violet-400">
-                              Auth Req
-                            </span>
-                          )}
-                          <span
-                            className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider font-mono border ${
-                              active
-                                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                                : "bg-red-500/10 border-red-500/20 text-red-400"
-                            }`}
-                          >
-                            {active ? "Active" : "Expired"}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Click Telemetry Counters */}
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] bg-neutral-950/60 px-2 py-0.5 rounded border border-neutral-800/80 text-neutral-400 flex items-center gap-1">
-                          Clicks: <strong className="text-white font-mono">{totalClicks}</strong>
-                        </span>
-                        <span className="text-[10px] bg-neutral-950/60 px-2 py-0.5 rounded border border-neutral-800/80 text-neutral-400 flex items-center gap-1">
-                          Unique: <strong className="text-white font-mono">{uniqueClicks}</strong>
-                        </span>
-                      </div>
-
-                      <p className="text-xs text-neutral-400 truncate" title={link.longUrl}>
-                        {link.longUrl}
-                      </p>
-                      <span className="text-[10px] text-neutral-500 font-mono">
-                        Created: {new Date(link.createdAt).toLocaleDateString()}
-                      </span>
-
-                      {!active && (
-                        <div className="text-[10px] text-red-400/90 mt-2 bg-red-950/10 border border-red-900/20 rounded-lg p-2.5 flex items-center gap-1.5 font-mono select-none">
-                          <AlertCircle className="h-3.5 w-3.5 flex-shrink-0 text-red-450 animate-pulse" />
-                          <span className="leading-tight">
-                            {(() => {
-                              const now = new Date();
-                              const isTimeExceeded = link.validUntil && now > new Date(link.validUntil);
-                              const isCapHit = link.maxClicks !== null && totalClicks >= link.maxClicks;
-                              if (isTimeExceeded && isCapHit) {
-                                return `Expired: Time limit exceeded (ended ${new Date(link.validUntil!).toLocaleString()}) & click cap hit (${link.maxClicks} max).`;
-                              }
-                              if (isTimeExceeded) {
-                                return `Expired: Time limit exceeded (ended ${new Date(link.validUntil!).toLocaleString()}).`;
-                              }
-                              if (isCapHit) {
-                                return `Expired: Click limit cap hit (${link.maxClicks} max).`;
-                              }
-                              const isPending = link.validFrom && now < new Date(link.validFrom);
-                              if (isPending) {
-                                return `Pending: Validity starts on ${new Date(link.validFrom!).toLocaleString()}.`;
-                              }
-                              return "Inactive: Link is unavailable.";
-                            })()}
-                          </span>
-                        </div>
-                      )}
-
-                    </div>
-
-                    <div className="flex gap-2 border-t border-neutral-800/60 pt-3 mt-1">
-                      <button
-                        type="button"
-                        onClick={() => handleCopy(link.slug)}
-                        className="flex-1 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-neutral-300 font-semibold py-2 px-3 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        {copiedSlug === link.slug ? (
-                          <>
-                            <Check className="h-3.5 w-3.5 text-emerald-500" />
-                            Copied
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="h-3.5 w-3.5" />
-                            Copy
-                          </>
-                        )}
-                      </button>
-                      
-                      <a
-                        href={`${origin}/${link.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-neutral-700 text-neutral-300 font-semibold py-2 px-3 rounded-xl text-xs transition-colors flex items-center justify-center cursor-pointer"
-                        title="Visit Link"
-                      >
-                        <ExternalLink className="h-3.5 w-3.5" />
-                      </a>
-
-                      {/* Analytics Navigation Link */}
-                      <Link
-                        href={`/analytics/${link.slug}`}
-                        className="bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-500 hover:text-violet-400 py-2 px-3 rounded-xl text-xs transition-colors flex items-center justify-center cursor-pointer"
-                        title="View Analytics"
-                      >
-                        <BarChart2 className="h-3.5 w-3.5" />
-                      </Link>
-
-                      {/* Edit Configurations Button */}
-                      <button
-                        type="button"
-                        onClick={() => startEditing(link)}
-                        className="bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-500 hover:text-white py-2 px-3 rounded-xl text-xs transition-colors flex items-center justify-center cursor-pointer"
-                        title="Edit Configurations"
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(link.slug)}
-                        className="bg-neutral-900 hover:bg-red-950/30 hover:border-red-900/50 hover:text-red-400 border border-neutral-800 text-neutral-500 py-2 px-3 rounded-xl text-xs transition-colors flex items-center justify-center cursor-pointer"
-                        title="Delete from Dashboard"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-neutral-900 py-6 bg-neutral-950/20 text-center text-xs text-neutral-500 z-10">
-        <p>&copy; {new Date().getFullYear()} Finite Loop Club. All rights reserved.</p>
-      </footer>
-      {/* Edit Modal Overlay */}
-      {editingLink && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl flex flex-col gap-6 relative animate-scaleIn">
-            <div className="flex justify-between items-center border-b border-neutral-800 pb-3">
-              <h4 className="text-lg font-bold text-white flex items-center gap-2">
-                <Pencil className="h-4 w-4 text-violet-400" />
-                Edit Configurations: <span className="font-mono text-neutral-400 text-sm">/{editingLink.slug}</span>
-              </h4>
+      {/* About Benefits Section */}
+      <section 
+        id="about" 
+        className={`py-20 border-t scroll-mt-20 transition-colors duration-500 ${
+          isDark 
+            ? "border-neutral-900 bg-neutral-950/40" 
+            : "border-neutral-100 bg-neutral-50/50"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col gap-16">
+          
+          {/* Section Heading */}
+          <div className="flex flex-col items-center gap-3">
+            <span className="text-xs font-mono font-bold tracking-widest text-violet-500 uppercase">
+              Creator Toolkit
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+              Powerful redirection utility suite
+            </h2>
+            <div className="h-1 w-24 bg-gradient-to-r from-violet-600 to-cyan-500 rounded-full mt-2" />
+          </div>
+
+          {/* Grid Layout of Benefits Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            {/* Card 1: Advanced Analytics */}
+            <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${
+              isDark 
+                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20" 
+                : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
+            }`}>
+              <div className={`p-3.5 rounded-2xl border transition-colors ${
+                isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
+              }`}>
+                <BarChart3 className="h-6 w-6" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[10px] font-mono font-bold text-violet-500 tracking-wider uppercase">Telemetry Logs</span>
+                <h3 className={`font-bold text-lg group-hover:text-violet-500 transition-colors ${isDark ? "text-white" : "text-neutral-900"}`}>Real-Time Analytics</h3>
+                <p className={`text-sm leading-relaxed transition-colors duration-500 ${isDark ? "text-neutral-400" : "text-neutral-600"}`}>
+                  Track clicks, unique creators, countries, browser formats, and operating system metrics on every link.
+                </p>
+              </div>
+              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border tracking-wide mt-2 ${
+                isDark ? "bg-violet-500/10 border-violet-500/20 text-violet-400" : "bg-violet-100 border-violet-200 text-violet-700"
+              }`}>
+                MOST POPULAR
+              </span>
             </div>
 
-            <form onSubmit={handleUpdate} className="flex flex-col gap-4">
-              {/* Destination URL */}
+            {/* Card 2: Validity Scheduler */}
+            <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${
+              isDark 
+                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20" 
+                : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
+            }`}>
+              <div className={`p-3.5 rounded-2xl border transition-colors ${
+                isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
+              }`}>
+                <Calendar className="h-6 w-6" />
+              </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-neutral-300">Destination URL</label>
-                <input
-                  type="text"
-                  value={editLongUrl}
-                  onChange={(e) => setEditLongUrl(e.target.value)}
-                  className="bg-neutral-950/80 border border-neutral-800 rounded-lg p-2.5 text-xs text-neutral-300 focus:outline-none focus:ring-1 focus:ring-violet-500"
-                  required
-                />
+                <span className="text-[10px] font-mono font-bold text-violet-500 tracking-wider uppercase">Chronos Controls</span>
+                <h3 className={`font-bold text-lg group-hover:text-violet-500 transition-colors ${isDark ? "text-white" : "text-neutral-900"}`}>Validity Scheduler</h3>
+                <p className={`text-sm leading-relaxed transition-colors duration-500 ${isDark ? "text-neutral-400" : "text-neutral-600"}`}>
+                  Enforce date ranges. Shortlinks automatically activate and expire at precise scheduled timestamps.
+                </p>
               </div>
+              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border tracking-wide mt-2 ${
+                isDark ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-emerald-100 border-emerald-200 text-emerald-700"
+              }`}>
+                PREMIUM UTILITY
+              </span>
+            </div>
 
-              {/* Dynamic Pickers grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-neutral-400">Valid From</label>
-                  <input
-                    type="datetime-local"
-                    value={editValidFrom}
-                    onChange={(e) => setEditValidFrom(e.target.value)}
-                    onClick={(e) => {
-                      try { e.currentTarget.showPicker(); } catch {}
-                    }}
-                    className="bg-neutral-950/80 border border-neutral-800 rounded-lg p-2.5 text-xs text-neutral-300 focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer text-left w-full"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-neutral-400">Valid Until</label>
-                  <input
-                    type="datetime-local"
-                    value={editValidUntil}
-                    onChange={(e) => setEditValidUntil(e.target.value)}
-                    onClick={(e) => {
-                      try { e.currentTarget.showPicker(); } catch {}
-                    }}
-                    className="bg-neutral-950/80 border border-neutral-800 rounded-lg p-2.5 text-xs text-neutral-300 focus:outline-none focus:ring-1 focus:ring-violet-500 cursor-pointer text-left w-full"
-                  />
-                </div>
+            {/* Card 3: Click Limit Caps */}
+            <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${
+              isDark 
+                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20" 
+                : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
+            }`}>
+              <div className={`p-3.5 rounded-2xl border transition-colors ${
+                isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
+              }`}>
+                <Zap className="h-6 w-6" />
               </div>
-
-              {/* Click Cap Limit */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-neutral-400">Max Clicks (Cap Limit)</label>
-                <input
-                  type="number"
-                  placeholder="Unlimited"
-                  value={editMaxClicks}
-                  onChange={(e) => setEditMaxClicks(e.target.value)}
-                  className="bg-neutral-950/80 border border-neutral-800 rounded-lg p-2.5 text-xs text-neutral-300 focus:outline-none focus:ring-1 focus:ring-violet-500"
-                />
+                <span className="text-[10px] font-mono font-bold text-violet-500 tracking-wider uppercase">Redirection Caps</span>
+                <h3 className={`font-bold text-lg group-hover:text-violet-500 transition-colors ${isDark ? "text-white" : "text-neutral-900"}`}>Click Limit Caps</h3>
+                <p className={`text-sm leading-relaxed transition-colors duration-500 ${isDark ? "text-neutral-400" : "text-neutral-600"}`}>
+                  Input a click maximum cap. Once reached, redirect access is terminated instantly to secure destinations.
+                </p>
               </div>
+              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border tracking-wide mt-2 ${
+                isDark ? "bg-amber-500/10 border-amber-500/20 text-amber-400" : "bg-amber-100 border-amber-200 text-amber-700"
+              }`}>
+                ADVANCED GUARD
+              </span>
+            </div>
 
-              {/* Secure FLCut auth toggle */}
-              <label className="flex items-center gap-3 cursor-pointer select-none border-t border-neutral-800/60 pt-4 mt-2">
-                <div className="relative">
-                  <input
-                    type="checkbox"
-                    checked={editRequireAuth}
-                    onChange={(e) => setEditRequireAuth(e.target.checked)}
-                    className="sr-only"
-                  />
-                  <div className={`w-10 h-5 rounded-full transition-colors ${editRequireAuth ? 'bg-violet-600' : 'bg-neutral-800'}`}></div>
-                  <div className={`absolute top-0.5 left-0.5 bg-white w-4 h-4 rounded-full transition-transform ${editRequireAuth ? 'translate-x-5' : 'translate-x-0'}`}></div>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-semibold text-neutral-300">Require FLCut Login</span>
-                  <span className="text-[10px] text-neutral-500">
-                    Force visitors to log in on FLCut.
-                  </span>
-                </div>
-              </label>
-
-              {/* Edit Error message */}
-              {editError && (
-                <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs p-3 rounded-lg flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4" />
-                  {editError}
-                </div>
-              )}
-
-              {/* Form Buttons */}
-              <div className="flex gap-2 border-t border-neutral-800 pt-4 mt-2">
-                <button
-                  type="button"
-                  onClick={() => setEditingLink(null)}
-                  className="flex-1 bg-neutral-950 hover:bg-neutral-900 border border-neutral-800 hover:border-neutral-750 text-neutral-400 hover:text-white text-xs font-semibold py-2.5 px-4 rounded-xl transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isUpdating}
-                  className="flex-1 bg-gradient-to-r from-violet-600 to-cyan-500 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition-all hover:opacity-95 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer shadow"
-                >
-                  {isUpdating ? "Saving..." : "Save Changes"}
-                </button>
+            {/* Card 4: Custom Slugs */}
+            <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${
+              isDark 
+                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20" 
+                : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
+            }`}>
+              <div className={`p-3.5 rounded-2xl border transition-colors ${
+                isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
+              }`}>
+                <Sliders className="h-6 w-6" />
               </div>
-            </form>
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[10px] font-mono font-bold text-violet-500 tracking-wider uppercase">Aliases Configuration</span>
+                <h3 className={`font-bold text-lg group-hover:text-violet-500 transition-colors ${isDark ? "text-white" : "text-neutral-900"}`}>Customizable Slugs</h3>
+                <p className={`text-sm leading-relaxed transition-colors duration-500 ${isDark ? "text-neutral-400" : "text-neutral-600"}`}>
+                  Bypass standard random hash links. Choose your own distinct slug text to promote brand identification.
+                </p>
+              </div>
+              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border tracking-wide mt-2 ${
+                isDark ? "bg-cyan-500/10 border-cyan-500/20 text-cyan-400" : "bg-cyan-100 border-cyan-200 text-cyan-700"
+              }`}>
+                BRAND CONTROL
+              </span>
+            </div>
+
+            {/* Card 5: Access Controls */}
+            <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${
+              isDark 
+                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20" 
+                : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
+            }`}>
+              <div className={`p-3.5 rounded-2xl border transition-colors ${
+                isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
+              }`}>
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[10px] font-mono font-bold text-violet-500 tracking-wider uppercase">Gatekeeper filters</span>
+                <h3 className={`font-bold text-lg group-hover:text-violet-500 transition-colors ${isDark ? "text-white" : "text-neutral-900"}`}>Visitor Authentication</h3>
+                <p className={`text-sm leading-relaxed transition-colors duration-500 ${isDark ? "text-neutral-400" : "text-neutral-600"}`}>
+                  Force visitors to sign in via Google login validation before they can access the final destination.
+                </p>
+              </div>
+              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border tracking-wide mt-2 ${
+                isDark ? "bg-violet-500/10 border-violet-500/20 text-violet-400" : "bg-violet-100 border-violet-200 text-violet-700"
+              }`}>
+                SECURITY LEVEL 1
+              </span>
+            </div>
+
+            {/* Card 6: Local Dashboard */}
+            <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${
+              isDark 
+                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20" 
+                : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
+            }`}>
+              <div className={`p-3.5 rounded-2xl border transition-colors ${
+                isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
+              }`}>
+                <Scissors className="h-6 w-6" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[10px] font-mono font-bold text-violet-500 tracking-wider uppercase">Browser Session storage</span>
+                <h3 className={`font-bold text-lg group-hover:text-violet-500 transition-colors ${isDark ? "text-white" : "text-neutral-900"}`}>Instant Storage</h3>
+                <p className={`text-sm leading-relaxed transition-colors duration-500 ${isDark ? "text-neutral-400" : "text-neutral-600"}`}>
+                  Shorten immediately without accounts. Non-logged users can view their created links stored inside localStorage.
+                </p>
+              </div>
+              <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded-full border tracking-wide mt-2 ${
+                isDark ? "bg-neutral-500/10 border-neutral-500/20 text-neutral-400" : "bg-neutral-100 border-neutral-200 text-neutral-700"
+              }`}>
+                FREE DEMO
+              </span>
+            </div>
+
           </div>
+
         </div>
-      )}
+      </section>
+
+      {/* Reusable Custom Footer */}
+      <Footer />
+
     </div>
   );
 }
