@@ -389,8 +389,8 @@ export default function AnalyticsPage({
 
       {/* Premium Glassmorphic Navbar with subtle accent line */}
       <header className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-all duration-500 shadow-md ${isDark
-          ? "border-violet-900/10 bg-neutral-950/30 shadow-violet-950/5"
-          : "border-violet-200/20 bg-white/30 shadow-violet-100/5"
+        ? "border-violet-900/10 bg-neutral-950/30 shadow-violet-950/5"
+        : "border-violet-200/20 bg-white/30 shadow-violet-100/5"
         }`}>
         {/* Subtle Bottom Accent Glow Line */}
         <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-violet-500/25 to-transparent" />
@@ -420,8 +420,8 @@ export default function AnalyticsPage({
               onClick={toggleTheme}
               aria-label="Toggle Theme"
               className={`p-2 rounded-xl border transition-all cursor-pointer ${isDark
-                  ? "bg-neutral-900 border-neutral-800 text-yellow-400 hover:bg-neutral-800"
-                  : "bg-white border-neutral-200 text-violet-600 hover:bg-neutral-50 shadow-sm"
+                ? "bg-neutral-900 border-neutral-800 text-yellow-400 hover:bg-neutral-800"
+                : "bg-white border-neutral-200 text-violet-600 hover:bg-neutral-50 shadow-sm"
                 }`}
             >
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -925,8 +925,8 @@ export default function AnalyticsPage({
                   type="button"
                   onClick={() => setIsEditing(false)}
                   className={`flex-1 border text-xs font-semibold py-2.5 px-4 rounded-xl transition-colors cursor-pointer ${isDark
-                      ? "bg-neutral-950 hover:bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
-                      : "bg-neutral-50 hover:bg-neutral-100 border-neutral-200 text-neutral-500 hover:text-neutral-900"
+                    ? "bg-neutral-950 hover:bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
+                    : "bg-neutral-50 hover:bg-neutral-100 border-neutral-200 text-neutral-500 hover:text-neutral-900"
                     }`}
                 >
                   Cancel

@@ -183,8 +183,8 @@ export default function LandingPage() {
 
       {/* Premium Glassmorphic Navbar with subtle accent line */}
       <header className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-all duration-500 shadow-md ${isDark
-          ? "border-violet-900/10 bg-neutral-950/30 shadow-violet-950/5"
-          : "border-violet-200/20 bg-white/30 shadow-violet-100/5"
+        ? "border-violet-900/10 bg-neutral-950/30 shadow-violet-950/5"
+        : "border-violet-200/20 bg-white/30 shadow-violet-100/5"
         }`}>
         {/* Subtle Bottom Accent Glow Line */}
         <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-violet-500/25 to-transparent" />
@@ -222,8 +222,8 @@ export default function LandingPage() {
               onClick={toggleTheme}
               aria-label="Toggle Theme"
               className={`p-2 rounded-xl border transition-all cursor-pointer ${isDark
-                  ? "bg-neutral-900 border-neutral-800 text-yellow-400 hover:bg-neutral-800"
-                  : "bg-white border-neutral-200 text-violet-600 hover:bg-neutral-50 shadow-sm"
+                ? "bg-neutral-900 border-neutral-800 text-yellow-400 hover:bg-neutral-800"
+                : "bg-white border-neutral-200 text-violet-600 hover:bg-neutral-50 shadow-sm"
                 }`}
             >
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -247,7 +247,7 @@ export default function LandingPage() {
                       {session?.user?.name ? session.user.name[0].toUpperCase() : "U"}
                     </div>
                   )}
-                  <span className="hidden md:inline max-w-[120px] truncate">{session?.user?.name || session?.user?.email}</span>
+                  <span className="hidden sm:inline max-w-[120px] truncate">{session?.user?.name || session?.user?.email}</span>
                 </div>
                 <Link
                   href="/app"
@@ -407,8 +407,8 @@ export default function LandingPage() {
       <section
         id="about"
         className={`py-20 border-t scroll-mt-20 transition-colors duration-500 ${isDark
-            ? "border-neutral-900 bg-neutral-950/40"
-            : "border-neutral-100 bg-neutral-50/50"
+          ? "border-neutral-900 bg-neutral-950/40"
+          : "border-neutral-100 bg-neutral-50/50"
           }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col gap-16">
@@ -429,8 +429,8 @@ export default function LandingPage() {
 
             {/* Card 1: Advanced Analytics */}
             <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${isDark
-                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20"
-                : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
+              ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20"
+              : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
               }`}>
               <div className={`p-3.5 rounded-2xl border transition-colors ${isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
                 }`}>
@@ -451,8 +451,8 @@ export default function LandingPage() {
 
             {/* Card 2: Validity Scheduler */}
             <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${isDark
-                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20"
-                : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
+              ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20"
+              : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
               }`}>
               <div className={`p-3.5 rounded-2xl border transition-colors ${isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
                 }`}>
@@ -473,8 +473,8 @@ export default function LandingPage() {
 
             {/* Card 3: Click Limit Caps */}
             <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${isDark
-                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20"
-                : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
+              ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20"
+              : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
               }`}>
               <div className={`p-3.5 rounded-2xl border transition-colors ${isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
                 }`}>
@@ -495,8 +495,8 @@ export default function LandingPage() {
 
             {/* Card 4: Custom Slugs */}
             <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${isDark
-                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20"
-                : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
+              ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20"
+              : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
               }`}>
               <div className={`p-3.5 rounded-2xl border transition-colors ${isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
                 }`}>
@@ -517,8 +517,8 @@ export default function LandingPage() {
 
             {/* Card 5: Access Controls */}
             <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${isDark
-                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20"
-                : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
+              ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20"
+              : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
               }`}>
               <div className={`p-3.5 rounded-2xl border transition-colors ${isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
                 }`}>
@@ -539,8 +539,8 @@ export default function LandingPage() {
 
             {/* Card 6: Local Dashboard */}
             <div className={`group border rounded-3xl p-8 flex flex-col items-start text-left gap-4 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 ${isDark
-                ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20"
-                : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
+              ? "bg-neutral-900/40 border-neutral-800/80 hover:border-violet-500/30 hover:bg-neutral-900/60 shadow-lg shadow-black/20"
+              : "bg-white border-neutral-200 hover:border-violet-500/20 hover:bg-white shadow-md hover:shadow-lg shadow-neutral-100"
               }`}>
               <div className={`p-3.5 rounded-2xl border transition-colors ${isDark ? "bg-neutral-950 border-neutral-800 text-violet-400 group-hover:text-white" : "bg-neutral-50 border-neutral-200 text-violet-600"
                 }`}>

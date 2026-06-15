@@ -390,8 +390,8 @@ export default function Home() {
 
       {/* Premium Glassmorphic Navbar with subtle accent line */}
       <header className={`sticky top-0 z-50 border-b backdrop-blur-xl transition-all duration-500 shadow-md ${isDark
-          ? "border-violet-900/10 bg-neutral-950/30 shadow-violet-950/5"
-          : "border-violet-200/20 bg-white/30 shadow-violet-100/5"
+        ? "border-violet-900/10 bg-neutral-950/30 shadow-violet-950/5"
+        : "border-violet-200/20 bg-white/30 shadow-violet-100/5"
         }`}>
         {/* Subtle Bottom Accent Glow Line */}
         <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-violet-500/25 to-transparent" />
@@ -426,8 +426,8 @@ export default function Home() {
               onClick={toggleTheme}
               aria-label="Toggle Theme"
               className={`p-2 rounded-xl border transition-all cursor-pointer ${isDark
-                  ? "bg-neutral-900 border-neutral-800 text-yellow-400 hover:bg-neutral-800"
-                  : "bg-white border-neutral-200 text-violet-600 hover:bg-neutral-50 shadow-sm"
+                ? "bg-neutral-900 border-neutral-800 text-yellow-400 hover:bg-neutral-800"
+                : "bg-white border-neutral-200 text-violet-600 hover:bg-neutral-50 shadow-sm"
                 }`}
             >
               {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -451,7 +451,7 @@ export default function Home() {
                       {user?.name ? user.name[0].toUpperCase() : "U"}
                     </div>
                   )}
-                  <span className="hidden md:inline max-w-[120px] truncate">{user?.name || user?.email}</span>
+                  <span className="hidden sm:inline max-w-[120px] truncate">{user?.name || user?.email}</span>
                 </div>
                 <button
                   onClick={() => signOut({ callbackUrl: "/" })}
@@ -504,8 +504,8 @@ export default function Home() {
                   value={longUrl}
                   onChange={(e) => setLongUrl(e.target.value)}
                   className={`w-full border rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all text-sm pr-12 ${isDark
-                      ? "bg-neutral-950/80 border-neutral-800 text-neutral-100 placeholder-neutral-500"
-                      : "bg-neutral-50/80 border-neutral-300 text-neutral-900 placeholder-neutral-400"
+                    ? "bg-neutral-950/80 border-neutral-800 text-neutral-100 placeholder-neutral-500"
+                    : "bg-neutral-50/80 border-neutral-300 text-neutral-900 placeholder-neutral-400"
                     }`}
                   required
                 />
@@ -606,8 +606,8 @@ export default function Home() {
                       value={maxClicks}
                       onChange={(e) => setMaxClicks(e.target.value)}
                       className={`border rounded-lg p-2 text-xs focus:outline-none focus:ring-1 focus:ring-violet-500 ${isDark
-                          ? "bg-neutral-950/80 border-neutral-800 text-neutral-300 placeholder-neutral-600"
-                          : "bg-neutral-50 border-neutral-300 text-neutral-800 placeholder-neutral-400"
+                        ? "bg-neutral-950/80 border-neutral-800 text-neutral-300 placeholder-neutral-600"
+                        : "bg-neutral-50 border-neutral-300 text-neutral-800 placeholder-neutral-400"
                         }`}
                     />
                   </div>
@@ -743,8 +743,8 @@ export default function Home() {
               onClick={() => setRefreshTrigger((prev) => prev + 1)}
               disabled={isFetchingLinks}
               className={`border p-2 rounded-xl transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 text-xs font-semibold select-none shadow-sm ${isDark
-                  ? "bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-white"
-                  : "bg-neutral-50 border-neutral-200 hover:bg-neutral-100 text-neutral-600 hover:text-neutral-900"
+                ? "bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-400 hover:text-white"
+                : "bg-neutral-50 border-neutral-200 hover:bg-neutral-100 text-neutral-600 hover:text-neutral-900"
                 }`}
               title="Refresh Dashboard"
             >
@@ -793,8 +793,8 @@ export default function Home() {
                   <div
                     key={link.id}
                     className={`border rounded-2xl p-5 shadow-sm transition-all flex flex-col justify-between gap-4 group relative overflow-hidden ${isDark
-                        ? "bg-neutral-900/35 border-neutral-800/80 hover:border-neutral-700/80"
-                        : "bg-white/60 border-neutral-200/80 hover:border-neutral-305"
+                      ? "bg-neutral-900/35 border-neutral-800/80 hover:border-neutral-700/80"
+                      : "bg-white/60 border-neutral-200/80 hover:border-neutral-305"
                       }`}
                   >
                     <div className="flex flex-col gap-2">
@@ -1040,8 +1040,8 @@ export default function Home() {
                   type="button"
                   onClick={() => setEditingLink(null)}
                   className={`flex-1 border text-xs font-semibold py-2.5 px-4 rounded-xl transition-colors cursor-pointer ${isDark
-                      ? "bg-neutral-950 hover:bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
-                      : "bg-neutral-50 hover:bg-neutral-100 border-neutral-200 text-neutral-500 hover:text-neutral-900"
+                    ? "bg-neutral-950 hover:bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white"
+                    : "bg-neutral-50 hover:bg-neutral-100 border-neutral-200 text-neutral-500 hover:text-neutral-900"
                     }`}
                 >
                   Cancel
