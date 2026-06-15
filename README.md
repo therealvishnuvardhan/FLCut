@@ -1,10 +1,11 @@
 # FLCut - An Advanced URL Shortener
+---
 
 FLCut is a powerful URL shortening app that has been created for the Finite Loop Club Hackfest 2026. FLCut provides more than just a simple way to shorten a link; it allows you to have scheduled lifetimes for your links, custom alias (aka "friendly") collision resolution, a click cap and fallback URL, visitor authentication requirements prior to redirecting users to the shortened URL, and a real-time tracking dashboard with pre-aggregated hourly telemetry.
 
 Application URL: https://flcut.vercel.app
----
-Code Repository: https://github.com/therealvishnuvardhan/FLCut
+
+
 
 ---
 
@@ -262,7 +263,7 @@ Uniqueness is determined by checking for a browser-specific cookie (flc_visit_ [
 - User Agent Parsing: We parse and naviage user agent to categorize visits by Device (Mobile, Tablet, Desktop), Browser (Chrome, Safari, Firefox, Edge, Opera), and Operating System (iOS, Android, Windows, macOS, Linux).
 - Bot and Scraper Filtering: To avoid inflating click logs, we can match user agent strings against common bot patterns (e.g. Googlebot, Twitterbot, Discordbot, Bingbot). If a scraper is detected, the event can be ignored or flagged, preventing artificial traffic spikes.
 
-## Design Decisions and Tradeoffs
+## Tradeoff
 
 ### The one core tradeoff: browser cookies for uniqueness
 
