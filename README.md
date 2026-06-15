@@ -49,7 +49,13 @@ npm install
 
 ### Step 3: Configure environment variables
 
-Create a `.env` file in the root of the project. This file is not committed to the repository, so you need to create it manually. Add the following:
+Copy the `.env.example` template to create your local `.env` configuration file:
+
+```bash
+cp .env.example .env
+```
+
+Open the newly created `.env` file and fill in the required credentials:
 
 ```env
 # PostgreSQL connection string
@@ -123,7 +129,8 @@ FLCut/
 │   └── lib/                   # Prisma client, auth config, utilities
 ├── next.config.ts
 ├── prisma.config.ts
-├── .env                       # Environment variables (not committed)
+├── .env                       # Local environment variables (not committed, copied from .env.example)
+├── .env.example               # Template for environment variables (committed)
 └── package.json
 ```
 

@@ -233,13 +233,30 @@ export default function LandingPage() {
             {status === "loading" ? (
               <div className={`h-8 w-20 rounded-xl animate-pulse ${isDark ? "bg-neutral-800" : "bg-neutral-200"}`} />
             ) : isLoggedIn ? (
-              <Link
-                href="/app"
-                className="bg-violet-600 hover:bg-violet-500 text-white font-semibold py-2 px-4 rounded-xl text-xs sm:text-sm transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-1.5 shadow-lg shadow-violet-600/20 cursor-pointer"
-              >
-                <LayoutDashboard className="h-3.5 w-3.5" />
-                Go to App
-              </Link>
+              <div className="flex items-center gap-3">
+                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border backdrop-blur-md select-none font-semibold text-xs transition-all ${isDark ? "bg-neutral-900/40 border-neutral-800 text-neutral-200" : "bg-white/40 border-neutral-250 text-neutral-700"}`}>
+                  {session?.user?.image ? (
+                    <img
+                      src={session.user.image}
+                      alt={session.user.name || "User"}
+                      className="h-5 w-5 rounded-full border border-neutral-300 dark:border-neutral-750 object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="h-5 w-5 rounded-full bg-violet-500/20 text-violet-500 flex items-center justify-center font-bold text-[10px]">
+                      {session?.user?.name ? session.user.name[0].toUpperCase() : "U"}
+                    </div>
+                  )}
+                  <span className="hidden md:inline max-w-[120px] truncate">{session?.user?.name || session?.user?.email}</span>
+                </div>
+                <Link
+                  href="/app"
+                  className="bg-violet-600 hover:bg-violet-500 text-white font-semibold py-2 px-4 rounded-xl text-xs sm:text-sm transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-1.5 shadow-lg shadow-violet-600/20 cursor-pointer"
+                >
+                  <LayoutDashboard className="h-3.5 w-3.5" />
+                  Go to App
+                </Link>
+              </div>
             ) : (
               <Link
                 href="/auth/login?callbackUrl=/app"
