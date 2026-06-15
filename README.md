@@ -263,14 +263,17 @@ Uniqueness is determined by checking for a browser-specific cookie (flc_visit_ [
 - User Agent Parsing: We parse and naviage user agent to categorize visits by Device (Mobile, Tablet, Desktop), Browser (Chrome, Safari, Firefox, Edge, Opera), and Operating System (iOS, Android, Windows, macOS, Linux).
 - Bot and Scraper Filtering: To avoid inflating click logs, we can match user agent strings against common bot patterns (e.g. Googlebot, Twitterbot, Discordbot, Bingbot). If a scraper is detected, the event can be ignored or flagged, preventing artificial traffic spikes.
 
-## Tradeoff
+## Tradeoffs
 
-### The one core tradeoff: browser cookies for uniqueness
+### 1 . The one core tradeoff: browser cookies for uniqueness
 
 Uniqueness is determined by a browser cookie, not by IP address or device fingerprint. If the same person opens a link in a different browser, uses incognito mode, or clears their cookies, they are counted as a new unique visitor.
 
 What was given up is cross-browser and cross-device accuracy. What was gained is simplicity, no IP address storage (which avoids GDPR exposure), and a behaviour that matches what most analytics tools including Google Analytics use by default. For a hackfest tool measuring event registrations, this is accurate enough.
 
+### 2 . There is a edit option in the website , if we edit anything then the link has to be forwarded again . For example if we chnage the expiry dates then new link has to be forwarded again the alredy sent link won't be updated it will still remain expired
+
+### Given more time in future can resolve all the tradeoffs
 
 ## Live Demo
 
