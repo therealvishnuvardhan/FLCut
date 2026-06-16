@@ -261,7 +261,7 @@ Uniqueness is determined by checking for a browser-specific cookie (flc_visit_ [
 - Total vs Unique Clicks: We set a cookie (flc_visit_ [slug]) on the visitor's browser for 24 hours. If the cookie is present, isUnique is set to false. If the cookie is absent, it is logged as unique.
 - Geography: Geolocation (Country and City) is resolved via Vercel Edge Headers (x-vercel-ip-country and x-vercel-ip-city) which are populated by Vercel edge routers.
 - User Agent Parsing: We parse and naviage user agent to categorize visits by Device (Mobile, Tablet, Desktop), Browser (Chrome, Safari, Firefox, Edge, Opera), and Operating System (iOS, Android, Windows, macOS, Linux).
-- Bot and Scraper Filtering: To avoid inflating click logs, we can match user agent strings against common bot patterns (e.g. Googlebot, Twitterbot, Discordbot, Bingbot). If a scraper is detected, the event can be ignored or flagged, preventing artificial traffic spikes.
+- Bot and Scraper Filtering: To prevent search engines (like Googlebot), link-preview scrapers (like Discord, Slack, or Twitter bots), and headless automation scripts (like Playwright or Puppeteer) from inflating analytics, we filter incoming user-agent strings. When a crawler is detected, we immediately return a successful response but skip database writes to protect resource limits. Instead, we run a background process to increment a separate counter in Upstash Redis and display the live blocked scraper count on the dashboard under "Bots Blocked", keeping your core click analytics clean.
 
 ## Tradeoffs
 

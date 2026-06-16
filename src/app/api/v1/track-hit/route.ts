@@ -1,6 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
 import { after } from "next/server";
 import { db } from "../../../../lib/db";
+import { redis } from "../../../../lib/redis";
+
+function checkIsBot(ua: string | null): boolean {
+  if (!ua) return false;
+  const botPatterns = [
+    "bot",
+    "spider",
+    "crawl",
+    "scraper",
+    "lighthouse",
+    "googlebot",
+    "bingbot",
+    "yandexbot",
+    "baiduspider",
+    "facebookexternalhit",
+    "twitterbot",
+    "rogerbot",
+    "linkedinbot",
+    "embedly",
+    "quora link preview",
+    "showyoubot",
+    "outbrain",
+    "pinterest/0.",
+    "slackbot",
+    "vkshare",
+    "w3c_validator",
+    "redditbot",
+    "applebot",
+    "whatsapp",
+    "telegrambot",
+    "discordbot",
+    "headless",
+    "puppeteer",
+    "selenium",
+    "playwright"
+  ];
+  const uaLower = ua.toLowerCase();
+  return botPatterns.some((pattern) => uaLower.includes(pattern));
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,6 +50,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Invalid telemetry payload" },
         { status: 400 }
+      );
+    }
+
+    // Filter out bots and scrapers
+    if (userAgent && checkIsBot(userAgent)) {
+      after(async () => {
+        try {
+          await redis.incr(`link:${slug}:bots`);
+        } catch (redisError) {
+          console.error("Failed to increment bot counter in Redis:", redisError);
+        }
+      });
+      return NextResponse.json(
+        { success: true, isBot: true, message: "Bot telemetry ignored" },
+        { status: 202 }
       );
     }
 

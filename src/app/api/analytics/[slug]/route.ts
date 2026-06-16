@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "../../../../lib/db";
 import { auth } from "../../../../auth";
+import { redis } from "../../../../lib/redis";
 
 export async function GET(
   req: NextRequest,
@@ -48,14 +49,31 @@ export async function GET(
       );
     }
 
+    // Fetch bot clicks counter from Redis
+    let botClicks = 0;
+    try {
+      const redisVal = await redis.get(`link:${slug}:bots`);
+      if (redisVal !== null) {
+        botClicks = Number(redisVal);
+      }
+    } catch (redisErr) {
+      console.error("Failed to fetch bot clicks from Redis:", redisErr);
+    }
+
     // Return link details and telemetry without caching
-    return NextResponse.json(link, {
-      headers: {
-        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-        Pragma: "no-cache",
-        Expires: "0",
+    return NextResponse.json(
+      {
+        ...link,
+        botClicks,
       },
-    });
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error fetching analytics details:", error);
     return NextResponse.json(

@@ -53,6 +53,7 @@ interface ShortLink {
   createdAt: string;
   analyticsEvents?: AnalyticsEvent[];
   hourlyAggregates?: HourlyAggregate[];
+  botClicks?: number;
 }
 
 function parseUserAgent(ua: string | null) {
@@ -540,26 +541,33 @@ export default function AnalyticsPage({
         </div>
 
         {/* Highlight Stats Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className={`border rounded-2xl p-5 flex flex-col gap-1.5 shadow-sm ${isDark ? "bg-neutral-900/35 border-neutral-800/80" : "bg-white/60 border-neutral-200/80"
             }`}>
             <span className="text-neutral-500 text-xs font-semibold uppercase tracking-wider">Total Clicks</span>
             <span className={`text-3xl font-black font-mono leading-none ${isDark ? "text-white" : "text-neutral-900"}`}>{totalClicks}</span>
-            <span className="text-[10px] text-neutral-500 mt-1">Sum of all clicks hit</span>
+            <span className="text-[10px] text-neutral-550 mt-1">Sum of all clicks hit</span>
           </div>
 
           <div className={`border rounded-2xl p-5 flex flex-col gap-1.5 shadow-sm ${isDark ? "bg-neutral-900/35 border-neutral-800/80" : "bg-white/60 border-neutral-200/80"
             }`}>
             <span className="text-neutral-550 text-xs font-semibold uppercase tracking-wider">Unique Clicks</span>
             <span className={`text-3xl font-black font-mono leading-none ${isDark ? "text-cyan-450" : "text-cyan-600"}`}>{uniqueClicks}</span>
-            <span className="text-[10px] text-neutral-500 mt-1">Clicks from unique tab sessions</span>
+            <span className="text-[10px] text-neutral-550 mt-1">Clicks from unique browser sessions</span>
           </div>
 
           <div className={`border rounded-2xl p-5 flex flex-col gap-1.5 shadow-sm ${isDark ? "bg-neutral-900/35 border-neutral-800/80" : "bg-white/60 border-neutral-200/80"
             }`}>
             <span className="text-neutral-550 text-xs font-semibold uppercase tracking-wider">Unique Ratio</span>
             <span className={`text-3xl font-black font-mono leading-none ${isDark ? "text-violet-400" : "text-violet-600"}`}>{conversionRate}%</span>
-            <span className="text-[10px] text-neutral-500 mt-1">Unique visitor conversion share</span>
+            <span className="text-[10px] text-neutral-550 mt-1">Unique visitor conversion share</span>
+          </div>
+
+          <div className={`border rounded-2xl p-5 flex flex-col gap-1.5 shadow-sm ${isDark ? "bg-neutral-900/35 border-neutral-800/80" : "bg-white/60 border-neutral-200/80"
+            }`}>
+            <span className="text-neutral-550 text-xs font-semibold uppercase tracking-wider">Bots Blocked</span>
+            <span className={`text-3xl font-black font-mono leading-none ${isDark ? "text-red-405" : "text-red-650"}`}>{link.botClicks || 0}</span>
+            <span className="text-[10px] text-neutral-550 mt-1">Automated scrapers ignored</span>
           </div>
 
           <div className={`border rounded-2xl p-5 flex flex-col gap-1.5 shadow-sm ${isDark ? "bg-neutral-900/35 border-neutral-800/80" : "bg-white/60 border-neutral-200/80"
