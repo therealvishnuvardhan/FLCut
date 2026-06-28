@@ -144,7 +144,7 @@ export default function Home() {
   useEffect(() => {
     setOrigin(window.location.origin);
     // Load local slugs
-    const storedSlugs = localStorage.getItem("flcut_local_slugs");
+    const storedSlugs = localStorage.getItem("linkchop_local_slugs");
     if (storedSlugs) {
       try {
         const parsed = JSON.parse(storedSlugs);
@@ -325,7 +325,7 @@ export default function Home() {
       // Save to local list if anonymous
       if (!isLoggedIn) {
         const updatedSlugs = [data.slug, ...localSlugs.filter((s) => s !== data.slug)];
-        localStorage.setItem("flcut_local_slugs", JSON.stringify(updatedSlugs));
+        localStorage.setItem("linkchop_local_slugs", JSON.stringify(updatedSlugs));
         setLocalSlugs(updatedSlugs);
       } else {
         // If logged in, reload link list from database directly
@@ -364,7 +364,7 @@ export default function Home() {
       }
     } else {
       const updatedSlugs = localSlugs.filter((s) => s !== slug);
-      localStorage.setItem("flcut_local_slugs", JSON.stringify(updatedSlugs));
+      localStorage.setItem("linkchop_local_slugs", JSON.stringify(updatedSlugs));
       setLocalSlugs(updatedSlugs);
     }
   };
@@ -400,12 +400,12 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center gap-3 group">
               <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-violet-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-violet-500/20 transition-transform group-hover:scale-105">
-                <span className="font-black text-black text-lg">FL</span>
+                <span className="font-black text-black text-lg">LC</span>
               </div>
               <div>
                 <span className={`font-bold text-lg leading-tight tracking-tight block ${isDark ? "text-white" : "text-neutral-900"
                   }`}>
-                  FLCut
+                  LinkChop
                 </span>
               </div>
             </Link>
@@ -528,7 +528,7 @@ export default function Home() {
                 }`}>
                 <span className={`px-4 flex items-center text-xs font-mono border-r select-none ${isDark ? "bg-neutral-900 text-neutral-400 border-neutral-800" : "bg-neutral-100 text-neutral-500 border-neutral-300"
                   }`}>
-                  {origin ? origin.replace(/^https?:\/\//i, "") : "flcut.club"}/
+                  {origin ? origin.replace(/^https?:\/\//i, "") : "linkchop.club"}/
                 </span>
                 <input
                   type="text"
@@ -627,9 +627,9 @@ export default function Home() {
                         <div className={`absolute top-0.5 left-0.5 bg-white w-4 h-4 rounded-full transition-transform ${requireAuth ? 'translate-x-5' : 'translate-x-0'}`}></div>
                       </div>
                       <div className="flex flex-col">
-                        <span className={`text-xs font-semibold ${isDark ? "text-neutral-300" : "text-neutral-700"}`}>Require FLCut Login</span>
+                        <span className={`text-xs font-semibold ${isDark ? "text-neutral-300" : "text-neutral-700"}`}>Require LinkChop Login</span>
                         <span className="text-[10px] text-neutral-500">
-                          Force visitors to sign in on FLCut first (ideal if the destination site has no built-in auth).
+                          Force visitors to sign in on LinkChop first (ideal if the destination site has no built-in auth).
                         </span>
                       </div>
                     </label>
@@ -699,7 +699,7 @@ export default function Home() {
                   rel="noopener noreferrer"
                   className="text-lg font-bold text-neutral-900 dark:text-white hover:text-cyan-600 dark:hover:text-cyan-400 flex items-center gap-1.5 transition-colors font-mono"
                 >
-                  {origin ? origin.replace(/^https?:\/\//i, "") : "flcut.club"}/{successLink.slug}
+                  {origin ? origin.replace(/^https?:\/\//i, "") : "linkchop.club"}/{successLink.slug}
                   <ExternalLink className="h-4 w-4 opacity-65" />
                 </a>
                 <span className="text-xs text-neutral-500 dark:text-neutral-500 max-w-md truncate">
@@ -1005,7 +1005,7 @@ export default function Home() {
                 />
               </div>
 
-              {/* Secure FLCut auth toggle */}
+              {/* Secure LinkChop auth toggle */}
               <label className={`flex items-center gap-3 cursor-pointer select-none border-t pt-4 mt-2 ${isDark ? "border-neutral-800/60" : "border-neutral-200"
                 }`}>
                 <div className="relative">
@@ -1019,9 +1019,9 @@ export default function Home() {
                   <div className={`absolute top-0.5 left-0.5 bg-white w-4 h-4 rounded-full transition-transform ${editRequireAuth ? 'translate-x-5' : 'translate-x-0'}`}></div>
                 </div>
                 <div className="flex flex-col">
-                  <span className={`text-xs font-semibold ${isDark ? "text-neutral-300" : "text-neutral-700"}`}>Require FLCut Login</span>
+                  <span className={`text-xs font-semibold ${isDark ? "text-neutral-300" : "text-neutral-700"}`}>Require LinkChop Login</span>
                   <span className="text-[10px] text-neutral-550">
-                    Force visitors to log in on FLCut.
+                    Force visitors to log in on LinkChop.
                   </span>
                 </div>
               </label>

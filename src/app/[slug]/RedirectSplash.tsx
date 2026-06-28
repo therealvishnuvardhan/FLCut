@@ -10,7 +10,7 @@ interface RedirectSplashProps {
 
 export function RedirectSplash({ linkId, slug, longUrl }: RedirectSplashProps) {
   useEffect(() => {
-    const cookieName = `flc_visit_${slug}`;
+    const cookieName = `linkchop_visit_${slug}`;
     console.log("=== client-side uniqueness debug ===");
     console.log("document.cookie:", document.cookie);
     const hasVisited = document.cookie.includes(`${cookieName}=`);
@@ -63,7 +63,7 @@ export function RedirectSplash({ linkId, slug, longUrl }: RedirectSplashProps) {
           {/* Header Tag */}
           <div className="absolute top-[-16px] left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-neutral-950 border border-neutral-800 shadow-md flex items-center gap-1.5 select-none">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="font-mono text-[8px] font-bold text-neutral-400 tracking-widest uppercase">FLCut Secure</span>
+            <span className="font-mono text-[8px] font-bold text-neutral-400 tracking-widest uppercase">LinkChop Secure</span>
           </div>
 
           {/* Security SVG Icon with fixed inline sizes */}

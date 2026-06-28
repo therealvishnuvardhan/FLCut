@@ -408,7 +408,7 @@ export default function AnalyticsPage({
             <div>
               <h1 className={`font-bold text-base sm:text-lg flex items-center gap-2 ${isDark ? "text-white" : "text-neutral-900"
                 }`}>
-                FLCut Console
+                LinkChop Console
                 <ChevronRight className="h-3.5 w-3.5 text-neutral-400 dark:text-neutral-600" />
                 <span className="font-mono text-violet-500 dark:text-violet-400 text-sm">/{link.slug}</span>
               </h1>
@@ -898,7 +898,7 @@ export default function AnalyticsPage({
                 />
               </div>
 
-              {/* Secure FLCut auth toggle */}
+              {/* Secure LinkChop auth toggle */}
               <label className={`flex items-center gap-3 cursor-pointer select-none border-t pt-4 mt-2 ${isDark ? "border-neutral-800/60" : "border-neutral-200"
                 }`}>
                 <div className="relative">
@@ -912,9 +912,9 @@ export default function AnalyticsPage({
                   <div className={`absolute top-0.5 left-0.5 bg-white w-4 h-4 rounded-full transition-transform ${editRequireAuth ? 'translate-x-5' : 'translate-x-0'}`}></div>
                 </div>
                 <div className="flex flex-col">
-                  <span className={`text-xs font-semibold ${isDark ? "text-neutral-300" : "text-neutral-700"}`}>Require FLCut Login</span>
+                  <span className={`text-xs font-semibold ${isDark ? "text-neutral-300" : "text-neutral-700"}`}>Require LinkChop Login</span>
                   <span className="text-[10px] text-neutral-500">
-                    Force visitors to log in on FLCut.
+                    Force visitors to log in on LinkChop.
                   </span>
                 </div>
               </label>

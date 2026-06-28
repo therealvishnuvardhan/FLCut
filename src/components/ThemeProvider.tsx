@@ -21,7 +21,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // Sync with localStorage on mount
   useEffect(() => {
-    const stored = localStorage.getItem("flcut-theme") as Theme;
+    const stored = localStorage.getItem("linkchop-theme") as Theme;
     if (stored) {
       setTheme(stored);
     } else {
@@ -42,7 +42,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.classList.remove("dark");
       root.style.colorScheme = "light";
     }
-    localStorage.setItem("flcut-theme", theme);
+    localStorage.setItem("linkchop-theme", theme);
   }, [theme, mounted]);
 
   const toggleTheme = () => {

@@ -8,7 +8,7 @@ export function Footer() {
   const isDark = theme === "dark";
 
   const footerData = {
-    brandName: "FLCut",
+    brandName: "LinkChop",
     socialLinks: [
       {
         icon: (
@@ -17,7 +17,7 @@ export function Footer() {
             <path d="M9 18c-4.51 2-5-2-7-2" />
           </svg>
         ),
-        href: "https://github.com/therealvishnuvardhan/FLCut",
+        href: "https://github.com/therealvishnuvardhan/LinkChop",
         label: "GitHub"
       },
       {
@@ -50,7 +50,7 @@ export function Footer() {
       { href: "#", label: "Terms of Service" },
     ],
     copyright: {
-      text: "© 2026 FLCut. All rights reserved.",
+      text: "© 2026 LinkChop. All rights reserved.",
       license: "MIT License",
     },
   };

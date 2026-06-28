@@ -58,17 +58,17 @@ export default function LoginPage() {
           {/* Brand/Logo */}
           <div className="flex flex-col items-center gap-2">
             <div className="h-16 w-16 rounded-2xl bg-gradient-to-tr from-violet-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-violet-500/20">
-              <span className="font-black text-black text-2xl">FL</span>
+              <span className="font-black text-black text-2xl">LC</span>
             </div>
             <div>
-              <h1 className={`font-bold text-2xl tracking-tight ${isDark ? "text-white" : "text-neutral-900"}`}>FLCut</h1>
-              <p className={`text-xs font-mono tracking-widest mt-1 ${isDark ? "text-neutral-450" : "text-neutral-500"}`}>FINITE LOOP CLUB</p>
+              <h1 className={`font-bold text-2xl tracking-tight ${isDark ? "text-white" : "text-neutral-900"}`}>LinkChop</h1>
+              <p className={`text-xs font-mono tracking-widest mt-1 ${isDark ? "text-neutral-450" : "text-neutral-500"}`}>COLLEGE PLATFORM</p>
             </div>
           </div>
 
           {/* Info */}
           <div className="flex flex-col gap-2">
-            <h2 className={`text-xl font-semibold ${isDark ? "text-neutral-100" : "text-neutral-900"}`}>Welcome to FLCut</h2>
+            <h2 className={`text-xl font-semibold ${isDark ? "text-neutral-100" : "text-neutral-900"}`}>Welcome to LinkChop</h2>
             <p className={`text-sm leading-relaxed ${isDark ? "text-neutral-400" : "text-neutral-500"}`}>
               Create branded links, manage advanced validity scheduler ranges, and track analytics. Login with your Google account to unlock creator dashboard features.
             </p>

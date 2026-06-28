@@ -1,18 +1,18 @@
-# FLCut - An Advanced URL Shortener
+# LinkChop - An Advanced URL Shortener
 ---
 
-FLCut is a powerful URL shortening app that has been created for the Finite Loop Club Hackfest 2026. FLCut provides more than just a simple way to shorten a link; it allows you to have scheduled lifetimes for your links, custom alias (aka "friendly") collision resolution, a click cap and fallback URL, visitor authentication requirements prior to redirecting users to the shortened URL, and a real-time tracking dashboard with pre-aggregated hourly telemetry.
+LinkChop is a powerful, college-wide URL shortening app designed to manage event links and redirects securely across the entire campus. LinkChop provides more than just a simple way to shorten a link; it allows you to have scheduled lifetimes for your links, custom alias (aka "friendly") collision resolution, a click cap and fallback URL, visitor authentication requirements prior to redirecting users to the shortened URL, and a real-time tracking dashboard with pre-aggregated hourly telemetry.
 
-Application URL: https://flcut.vercel.app
+Application URL: https://linkchop.vercel.app
 
 
 
 ---
 
-What FLCut Can Do for You
+What LinkChop Can Do for You
 
-Shorten any long URL and make it into a nice clean and shareable link within the flcut.vercel.app domain
-Provide a custom alias for your shortened links (for example: //flcut.vercel.app/hackfest26)
+Shorten any long URL and make it into a nice clean and shareable link within the linkchop.vercel.app domain
+Provide a custom alias for your shortened links (for example: //linkchop.vercel.app/orientation2026)
 Set specific schedule for when your link will go live (be available to users) and when it expires (is no longer valid), even down to the minute
 Limit the number of times a link will redirect and redirect any visitors to another (fall-back) URL if the click limit has been exceeded
 Require authentication using Google before allowing an individual to be redirected to the link
@@ -38,8 +38,8 @@ Before running this locally, make sure you have the mentioned or else will be a 
 ### Step 1: Clone the repository
 
 ```bash
-git clone https://github.com/therealvishnuvardhan/FLCut.git
-cd FLCut
+git clone https://github.com/therealvishnuvardhan/LinkChop.git
+cd LinkChop
 ```
 
 ### Step 2: Install dependencies
@@ -115,7 +115,7 @@ The app will be available at http://localhost:3000.
 ## Project Structure
 
 ```
-FLCut/
+LinkChop/
 ├── prisma/
 │   └── schema.prisma          # Full database schema
 ├── public/                    # Static assets
@@ -172,7 +172,7 @@ The separation between AnalyticsEvent and HourlyAggregate is intentional. Analyt
 
 ## Features in Detail
 
-**Custom Aliases** — Choose your own slug like `/hackfest26` or `/workshop-rsvp` at creation time. Slugs must be between 3 and 30 characters and contain only alphanumeric characters, hyphens, and underscores.
+**Custom Aliases** — Choose your own slug like `/orientation2026` or `/workshop-rsvp` at creation time. Slugs must be between 3 and 30 characters and contain only alphanumeric characters, hyphens, and underscores.
 
 **Validity Scheduling** — Set a `validFrom` and `validUntil` timestamp. The link will not redirect before the start time or after the end time. No manual toggling required: create the link on Monday, share it immediately, and it activates itself on Friday at 6pm.
 
@@ -191,14 +191,14 @@ The separation between AnalyticsEvent and HourlyAggregate is intentional. Analyt
 ## Core Challenge Solutions
 
 ### 1. Custom Aliases & Collision Resolution
-FLCut allows users to define custom short link slugs. When users request custom slugs, they are validated against several constraints:
+LinkChop allows users to define custom short link slugs. When users request custom slugs, they are validated against several constraints:
 - Length: Must be between 3 and 30 characters.
 - Format: Must contain only alphanumeric characters, hyphens, and underscores.
 - Reserved Words: Slugs like admin, api, login, auth, and sitemap are blocked to prevent hijacking of system routes.
 - Content Moderation: A profanity filter using the obscenity package blocks inappropriate words to protect the domain's reputation.
 
 #### Collision Suggestions
-If a user requests an alias that is already taken, the database unique constraint throws a P2002 error code. Instead of throwing a generic error, FLCut catches the conflict and automatically generates three available suggestions:
+If a user requests an alias that is already taken, the database unique constraint throws a P2002 error code. Instead of throwing a generic error, LinkChop catches the conflict and automatically generates three available suggestions:
 - Suffix Appending: It appends common templates like -flc, -rsvp, -2026, or -go.
 - Random Appending: If suffix combinations are taken, it appends random 3-digit numbers.
 - Availability Verification: The generator checks the database to verify the suggestions are vacant before returning them, ensuring the user gets working alternatives immediately.
@@ -212,7 +212,7 @@ This number is then encoded using Hashids with a custom secret salt. This method
 - Non-guessable paths, hiding the auto-increment database sequence from the end user.
 
 ### 2. Scheduled & Expiring Links
-Event links often have strict active windows. FLCut enforces expiration and traffic caps through a middleware-free redirection handler located in the dynamic [slug] route:
+Event links often have strict active windows. LinkChop enforces expiration and traffic caps through a middleware-free redirection handler located in the dynamic [slug] route:
 
 - Scheduled Activation (validFrom): Before the go-live timestamp, visitors are redirected to an inactive page notifying them that the link is not yet active.
 - Expiration Time (validUntil): Once the end timestamp passes, redirects are blocked and visitors land on an inactive page explaining that the link has expired.
@@ -220,7 +220,7 @@ Event links often have strict active windows. FLCut enforces expiration and traf
 - Optional Authentication (bypassAuth): When toggled off, visitors must authenticate via Google before they are redirected to the target URL. This ensures only logged-in members can access specific event links.
 
 ### 3. Smart Analytics & Telemetry
-Analytics tracking should not slow down the redirect experience for the end user. FLCut separates redirect rendering from database logging.
+Analytics tracking should not slow down the redirect experience for the end user. LinkChop separates redirect rendering from database logging.
 
 #### Telemetry Flow
 When a user visits a short link, the server resolves the dynamic slug and immediately renders a client-side redirection splash card. This card initiates the redirect using a client-side timer while sending telemetry data in the background using navigator.sendBeacon (or fallback fetch keepalive) to `/api/v1/track-hit`. 
@@ -249,9 +249,9 @@ Uniqueness is determined by checking for a browser-specific cookie (flc_visit_ [
 
 **Who can create links.** The PRD described a tool for club events but did not say whether link creation is for organisers only or anyone. The assumption was that anyone should be able to shorten links without signing up, with local storage tracking so guest users see their links on the landing page. Signing in is required only for persistent management and analytics.
 
-**The inactive link experience.** Rather than returning a generic 404 when a link is expired, capped, or not yet active, FLCut shows a branded page explaining specifically why the link is unavailable. This was assumed to be a better user experience even though the PRD did not specify it.
+**The inactive link experience.** Rather than returning a generic 404 when a link is expired, capped, or not yet active, LinkChop shows a branded page explaining specifically why the link is unavailable. This was assumed to be a better user experience even though the PRD did not specify it.
 
-**Profanity filtering.** Public custom slugs are vulnerable to abuse since they appear as part of the domain. A profanity filter was added to prevent inappropriate words from being bound to the flcut domain without any explicit PRD requirement.
+**Profanity filtering.** Public custom slugs are vulnerable to abuse since they appear as part of the domain. A profanity filter was added to prevent inappropriate words from being bound to the linkchop domain without any explicit PRD requirement.
 
 **Collision suggestions.** Returning a raw error on slug collision would feel broken to a user who spent time picking a name. The suggestion engine was built on the assumption that giving users three working alternatives immediately is a significantly better experience than telling them to try again and figure it out themselves.
 
@@ -269,7 +269,7 @@ Uniqueness is determined by checking for a browser-specific cookie (flc_visit_ [
 
 Uniqueness is determined by a browser cookie, not by IP address or device fingerprint. If the same person opens a link in a different browser, uses incognito mode, or clears their cookies, they are counted as a new unique visitor.
 
-What was given up is cross-browser and cross-device accuracy. What was gained is simplicity, no IP address storage (which avoids GDPR exposure), and a behaviour that matches what most analytics tools including Google Analytics use by default. For a hackfest tool measuring event registrations, this is accurate enough.
+What was given up is cross-browser and cross-device accuracy. What was gained is simplicity, no IP address storage (which avoids GDPR exposure), and a behaviour that matches what most analytics tools including Google Analytics use by default. For a college-wide tool measuring event registrations, this is accurate enough.
 
 ### 2 . There is a edit option in the website , if we edit anything then the link has to be forwarded again . For example if we chnage the expiry dates then new link has to be forwarded again the alredy sent link won't be updated it will still remain expired
 
@@ -277,7 +277,7 @@ What was given up is cross-browser and cross-device accuracy. What was gained is
 
 ## Live Demo
 
-The hosted version is available at https://flcut.vercel.app.
+The hosted version is available at https://golinkchop.vercel.app/.
 
 You can shorten a link without signing in. Signing in with Google unlocks the full dashboard with analytics, link management, and the ability to edit or deactivate links after creation.
 

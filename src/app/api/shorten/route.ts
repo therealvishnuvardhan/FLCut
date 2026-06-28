@@ -156,7 +156,7 @@ export async function POST(req: NextRequest) {
 async function generateUniqueSuggestions(baseSlug: string): Promise<string[]> {
   const suggestions: string[] = [];
   const suffixes = [
-    "flc",
+    "chop",
     "2026",
     "rsvp",
     "link",

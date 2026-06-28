@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FLCut | Premium Link Shortener",
-  description: "Create short, powerful, branded links with built-in analytics, expiration caps, and scheduling controls for the Finite Loop Club.",
+  title: "LinkChop | Premium Link Shortener",
+  description: "Create short, powerful, branded links with built-in analytics, expiration caps, and scheduling controls for college-wide events.",
 };
 
 export default function RootLayout({

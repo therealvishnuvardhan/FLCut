@@ -76,7 +76,7 @@ export default function LandingPage() {
 
   // Social and Navigation links for Footer
   const footerData = {
-    brandName: "FLCut",
+    brandName: "LinkChop",
     socialLinks: [
       {
         icon: (
@@ -118,7 +118,7 @@ export default function LandingPage() {
       { href: "#", label: "Terms of Service" },
     ],
     copyright: {
-      text: "© 2026 FLCut. All rights reserved.",
+      text: "© 2026 LinkChop. All rights reserved.",
       license: "MIT License",
     },
   };
@@ -195,11 +195,11 @@ export default function LandingPage() {
           <div ref={logoRef} className="flex items-center gap-3 group relative z-10 select-none">
             <Link href="/app" className="flex items-center gap-3">
               <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-violet-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-violet-500/20 transition-transform group-hover:scale-105">
-                <span className="font-black text-black text-lg">FL</span>
+                <span className="font-black text-black text-lg">LC</span>
               </div>
               <div>
                 <span className="font-bold text-lg leading-tight tracking-tight block">
-                  FLCut
+                  LinkChop
                 </span>
               </div>
             </Link>
@@ -281,7 +281,7 @@ export default function LandingPage() {
             {/* Main Brand Title */}
             <div>
               <h1 className="story-script-regular text-8xl sm:text-9xl tracking-normal text-transparent bg-clip-text bg-gradient-to-r from-violet-500 via-purple-500 to-cyan-500 drop-shadow-[0_2px_15px_rgba(139,92,246,0.15)] leading-[0.85] select-none pb-4">
-                flcut
+                linkchop
               </h1>
               <h2 className="font-extrabold text-4xl sm:text-5xl lg:text-6xl mt-4 tracking-tight leading-none">
                 Link Redirection, <span className="story-script-regular text-violet-500 dark:text-violet-400 text-5xl sm:text-6xl md:text-7xl block sm:inline-block ml-1 font-normal tracking-wide drop-shadow-[0_2px_8px_rgba(139,92,246,0.2)]">Redefined</span>

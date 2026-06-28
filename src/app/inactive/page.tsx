@@ -41,7 +41,7 @@ function InactiveContent() {
 
       <div className="flex flex-col gap-3">
         <span className="text-[10px] text-neutral-500 dark:text-neutral-400 font-mono tracking-widest uppercase">
-          FLCut Redirect Guard
+          LinkChop Redirect Guard
         </span>
         <h1 className="font-bold text-2xl text-neutral-900 dark:text-white tracking-tight">{title}</h1>
         <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed">
@@ -65,7 +65,7 @@ function InactiveContent() {
         className="w-full bg-neutral-950 dark:bg-white hover:bg-neutral-850 dark:hover:bg-neutral-200 text-white dark:text-black font-bold py-3.5 px-6 rounded-xl text-sm transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 shadow-lg select-none cursor-pointer font-sans"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to FLCut Home
+        Back to LinkChop Home
       </Link>
     </div>
   );
