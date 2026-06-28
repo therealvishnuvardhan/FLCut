@@ -3,7 +3,7 @@
 
 LinkChop is a powerful, college-wide URL shortening app designed to manage event links and redirects securely across the entire campus. LinkChop provides more than just a simple way to shorten a link; it allows you to have scheduled lifetimes for your links, custom alias (aka "friendly") collision resolution, a click cap and fallback URL, visitor authentication requirements prior to redirecting users to the shortened URL, and a real-time tracking dashboard with pre-aggregated hourly telemetry.
 
-Application URL: https://linkchop.vercel.app
+Application URL: https://golinkchop.vercel.app/
 
 
 
